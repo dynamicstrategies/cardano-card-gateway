@@ -9,6 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@blueprintjs/core": "^5.15.0",
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "@meshsdk/core": "^1.7.19",
+    "@wert-io/module-react-component": "^2.1.4",
+    "axios": "^1.7.7",
+    "classnames": "^2.5.1",
     "mobx": "^6.13.5",
     "mobx-react": "^9.1.1",
     "next": "14.2.18",
