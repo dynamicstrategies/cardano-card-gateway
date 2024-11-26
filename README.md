@@ -5,11 +5,11 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="public/cardano_logo.png" alt="Logo" width="320" height="65">
+    <img src="public/images/cardano_logo.png" alt="Logo" width="320" height="65">
   </a>
 
 <h3 align="center">Cardano Card Gateway</h3>
-
+<a href="https://cardgateway.work.gd">Demo</a>
 </div>
 
 

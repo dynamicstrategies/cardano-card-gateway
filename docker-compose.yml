@@ -1,8 +1,8 @@
 version: "3.5"
 
 services:
-  TESTNET_CGATEWAY_mongodb:
-    container_name: TESTNET_CGATEWAY_mongodb
+  TESTNET_cgateway_mongodb:
+    container_name: TESTNET_cgateway_mongodb
     image: mongo:latest
     #    command: bash -c "mongod --repair"
     restart: always
@@ -16,7 +16,7 @@ services:
     container_name: TESTNET_cgateway_nextjs
     restart: always
     ports:
-      - 127.0.0.1:7035:3000
+      - 127.0.0.1:6075:3000
     environment:
       - ASSET_POLICY_ID=8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d
       - ASSET_NAME=NeoWindsurfer
@@ -27,7 +27,7 @@ services:
       - WERT_NETWORK=amoy
       - WERT_PAYTO_WALLET=0x36A3dBc3818443067C1383981d3B4117A22BE7F3
     depends_on:
-      - TESTNET_CGATEWAY_mongodb
+      - TESTNET_cgateway_mongodb
 
 volumes:
   mongodb-cgateway:
