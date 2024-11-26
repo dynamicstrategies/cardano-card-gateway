@@ -396,7 +396,13 @@ const Home = observer(class Home extends React.Component {
 
                     <div className="space-y-6 pb-8">
                       <p className="text-base text-gray-900">
-                        An exclusive NFT that captures the electrifying blend of sport and sci-fi. This one-of-a-kind artwork showcases a futuristic athlete carving through massive, glowing waves on a vibrant ocean. The windsurfer's gear features neon accents and advanced materials, while the high-tech sail glows with energy patterns. A mesmerizing sunset bathes the scene in vivid hues of orange, pink, and purple, complemented by the dramatic splash of holographic water.
+                        An exclusive NFT that captures the electrifying blend of sport and sci-fi.
+                        This one-of-a-kind artwork showcases a futuristic athlete carving through
+                        massive, glowing waves on a vibrant ocean. The windsurfer&apos;s gear features
+                        neon accents and advanced materials, while the high-tech sail glows
+                        with energy patterns. A mesmerizing sunset bathes the scene in vivid hues
+                        of orange, pink, and purple, complemented by the dramatic splash of
+                        holographic water.
                       </p>
                     </div>
                     <Image src="/images/nftxyz.png" alt="nft xyz" width="700" height="700"/>
