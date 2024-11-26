@@ -54,6 +54,10 @@ and other digital payments.
 - The backend sends the buyer a token on the Cardano blockchain
 
 
+### Demo
+Demo of a sample shop-front with a "Pay with Card" button will be shown here
+
+<a href="https://cardgateway.work.gd">cardgateway.work.gd</a>
 
 ### Built With
 
@@ -96,7 +100,23 @@ This is an example of how to list things you need to use the software and how to
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+Get the Metamask Browser Extension
+Create a wallet and connect to the Polygon Amoy network. You can use this website to do this
+```shell
+https://chainlist.org/chain/80002
+```
 
+Get test "POL" token from this faucet `https://faucet.polygon.technology/`
+You will need to connect with your Discord server to request the test tokens on the website
+
+
+## Deploy EVM Smart Contract
+Access Remix `https://remix.ethereum.org/`
+
+
+## Testing
+
+Test with card details as described here `https://docs.wert.io/docs/sandbox`
 
 
 <!-- LICENSE -->

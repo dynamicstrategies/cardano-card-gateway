@@ -11,11 +11,27 @@ import Head from 'next/head';
 import {FormGroup, InputGroup} from "@blueprintjs/core";
 import {reaction} from "mobx";
 import {isObjEmpty} from "@/components/utils";
+import PayWithWert from "@/components/PayWithWert";
+import axios from "axios";
 
+
+export const getServerSideProps = async (ctx) => {
+
+  const WERT_WEBHOOK_API = process.env.WERT_WEBHOOK_API;
+  const ASSET_NAME = process.env.ASSET_NAME;
+  const ASSET_IMG_SRC = process.env.ASSET_IMG_SRC;
+
+  return {
+    props: {
+      WERT_WEBHOOK_API,
+      ASSET_NAME,
+      ASSET_IMG_SRC,
+    }
+  }
+}
 
 
 const reviews = { href: '#', average: 4, totalCount: 117 }
-
 
 const Home = observer(class Home extends React.Component {
 
@@ -23,7 +39,9 @@ const Home = observer(class Home extends React.Component {
     super(props);
 
     this.state = {
-      changeAddress: "..."
+      changeAddress: "",
+      wertPrvKey: "",
+      wertPartnerId: "",
     }
 
     this.globalState = State;
@@ -32,12 +50,100 @@ const Home = observer(class Home extends React.Component {
   }
 
 
-  /*
-        Open the Asset placer form the user has requested
-        to place assets at a GPS location
-         */
+  handleWertInitiated = async () => {
+    const paymentTxHash = undefined;
+    let buyStatus = this.state.buyStatus;
+    buyStatus.processing = true;
+    buyStatus.initiated = true;
+    buyStatus.paymentDelivered = false;
+    buyStatus.ticketQueued = false;
+    buyStatus.ticketSent = false;
+    buyStatus.ticketDelivered = false;
+
+    const buySentTxHash = undefined;
+
+    this.setState({paymentTxHash, buyStatus, buySentTxHash});
+
+    try {
+      const buyId = await this.addTicketToQueue("wert");
+      return buyId
+    } catch (err) {
+      throw err;
+    }
+  }
 
 
+  addTicketToQueue = async () => {
+
+    const payMethod = "fiat"
+
+    let payload = {
+      purpose: "newticket",
+      ticketPolicyId: this.props.eventDict.ticketPolicyId,
+      ticketAssetName: this.props.eventDict.ticketAssetName,
+      ticketAmount: 1,
+      collatAdaAmount: this.props.collatRequired || 0,
+      paymentTxHash: this.state.paymentTxHash,
+      userWalletAddress: this.props.walletAddress,
+      payMethod: payMethod,
+      status: "initiated"
+    };
+    const req = JSON.stringify(payload);
+
+    // console.log(req)
+
+    try {
+      const URL = `${this.props.WERT_WEBHOOK_API}/tickets`
+      const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
+
+      if (response.status === 201) {
+
+        // console.log(response.data)
+        const ticketId = response.data?._id || undefined;
+        this.setState({ticketId});
+        return ticketId
+
+      } else {
+        // console.log(response)
+        throw Error ("could not retrieve ticketId")
+      }
+
+    } catch (err) {
+      throw err;
+    }
+  }
+
+
+  updateTxHashInDB = async (ticketId, paymentTxHash) => {
+
+    let payload = {
+      purpose: "updatetxhash",
+      ticketId,
+      paymentTxHash
+    }
+
+    const req = JSON.stringify(payload);
+
+    try {
+      const URL = `${this.props.WERT_WEBHOOK_API}/tickets`
+      const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
+
+      if (response.status === 200) {
+
+        const data = response.data;
+        // console.log(data);
+        return data
+
+      } else {
+        // console.log(response)
+        throw Error("Error updating paymentTxHash")
+      }
+
+    } catch (err) {
+      throw err;
+    }
+
+  }
 
 
   componentDidMount() {
@@ -200,7 +306,73 @@ const Home = observer(class Home extends React.Component {
 
                     </div>
 
-                    {/* Sizes */}
+
+
+                    {/*<button*/}
+                    {/*    type="submit"*/}
+                    {/*    className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"*/}
+                    {/*>*/}
+                    {/*  Pay with Card*/}
+                    {/*</button>*/}
+
+                    {this.state.wertPartnerId &&
+                      <PayWithWert
+                          adaAmount={75}
+                          WERT_WEBHOOK_API={this.props.WERT_WEBHOOK_API}
+                          handleWertInitiated={this.handleWertInitiated}
+                          WERT_PARTNER_ID={this.state.wertPartnerId}
+                          WERT_SECRET_KEY={this.state.wertPrvKey}
+                          ticketId={this.state.ticketId}
+                          ticketAssetName={this.props.ASSET_NAME}
+                          ticketImgSrc={this.props.ASSET_IMG_SRC || ""}
+                          // eventId={this.props.eventId}
+                          // walletAddress={this.props.walletAddress}
+                          updateTxHashInDB={this.updateTxHashInDB}
+                      />
+                    }
+
+                    <div id="wert_credentials" className="text-base font-strong text-gray-700">
+                      <FormGroup
+                          helperText={<div className="text-gray-700">Your Partner ID on the Wert.io platform</div>}
+                          style={{fontSize: "12px"}}
+                          label="Wert Partner Id"
+                      >
+                        <InputGroup
+                            style={{fontSize: "12px"}}
+                            disabled={false}
+                            placeholder="should start with 0x..."
+                            leftIcon="id-number"
+                            onChange={(str) => {
+
+                              this.setState({wertPartnerId: str.target.value})
+                            }}
+                            value={this.state.wertPartnerId}
+
+                        />
+                      </FormGroup>
+
+                      <FormGroup
+                          helperText={<div className="text-gray-700">The private key that you should have received when
+                            signing up with Wert.io</div>}
+                          style={{fontSize: "12px"}}
+                          label="Wert Private Key"
+                      >
+                        <InputGroup
+                            style={{fontSize: "12px"}}
+                            disabled={false}
+                            placeholder="should start with 0x..."
+                            leftIcon="id-number"
+                            onChange={(str) => {
+
+                              this.setState({wertPrvKey: str.target.value})
+                            }}
+                            value={this.state.wertPrvKey}
+
+                        />
+                      </FormGroup>
+                    </div>
+
+
                     <div className="mt-10">
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-gray-900">Status</h3>
@@ -211,13 +383,6 @@ const Home = observer(class Home extends React.Component {
 
 
                     </div>
-
-                    <button
-                        type="submit"
-                        className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      Pay with Card
-                    </button>
 
 
                   </div>
