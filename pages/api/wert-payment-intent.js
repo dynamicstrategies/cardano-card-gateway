@@ -13,8 +13,8 @@ const handle = async (req, res) => {
         let result;
         let statusCode;
 
-        const { ticketId, WERT_SECRET_KEY} = req.body;
-        console.log(ticketId)
+        const {orderId, WERT_SECRET_KEY} = req.body;
+        console.log(orderId)
 
         // let priceUSD;
         const pricePOL = 2.5;

@@ -8,22 +8,28 @@ import classNames from "classnames";
 import Image from "next/image";
 import IndexHeader from "@/components/IndexHeader";
 import Head from 'next/head';
-import {FormGroup, InputGroup} from "@blueprintjs/core";
+import {FormGroup, Icon, InputGroup, Intent, Spinner, SpinnerSize} from "@blueprintjs/core";
 import {reaction} from "mobx";
-import {isObjEmpty} from "@/components/utils";
+import {isObjEmpty, truncate} from "@/components/utils";
 import PayWithWert from "@/components/PayWithWert";
 import axios from "axios";
 
-
+/**
+ * NextJS allows you to read the variables from an .env file and pass them as props
+ * to the component. The .env variables can then be defined in the docker-compose file
+ * in production
+ */
 export const getServerSideProps = async (ctx) => {
 
   const WERT_WEBHOOK_API = process.env.WERT_WEBHOOK_API;
+  const ASSET_POLICY_ID = process.env.ASSET_POLICY_ID
   const ASSET_NAME = process.env.ASSET_NAME;
   const ASSET_IMG_SRC = process.env.ASSET_IMG_SRC;
 
   return {
     props: {
       WERT_WEBHOOK_API,
+      ASSET_POLICY_ID,
       ASSET_NAME,
       ASSET_IMG_SRC,
     }
@@ -33,18 +39,44 @@ export const getServerSideProps = async (ctx) => {
 
 const reviews = { href: '#', average: 4, totalCount: 117 }
 
+
+/**
+ * This is a Class component with the content of the main page.
+ * Class components allow for better state management and that is
+ * why we chose them over Functional components for this project
+ */
 const Home = observer(class Home extends React.Component {
 
   constructor(props) {
     super(props);
 
+
+    // Local State
     this.state = {
       changeAddress: "",
       wertPrvKey: "",
       wertPartnerId: "",
+
+      orderId: undefined,
+
+      orderStatus: {
+        processing: false,
+        initiated: false,
+        paymentDelivered: false,
+        orderQueued: false,
+        orderSent: false,
+        orderDelivered: false,
+      },
+
+      orderSentTxHash: undefined,
+
+
     }
 
+    // Global state managed by mobX
     this.globalState = State;
+
+    // non-state, global variabales
     this.reactionDisposer = undefined;
 
   }
@@ -52,21 +84,21 @@ const Home = observer(class Home extends React.Component {
 
   handleWertInitiated = async () => {
     const paymentTxHash = undefined;
-    let buyStatus = this.state.buyStatus;
-    buyStatus.processing = true;
-    buyStatus.initiated = true;
-    buyStatus.paymentDelivered = false;
-    buyStatus.ticketQueued = false;
-    buyStatus.ticketSent = false;
-    buyStatus.ticketDelivered = false;
+    let orderStatus = this.state.orderStatus;
+    orderStatus.processing = true;
+    orderStatus.initiated = true;
+    orderStatus.paymentDelivered = false;
+    orderStatus.orderQueued = false;
+    orderStatus.orderSent = false;
+    orderStatus.orderDelivered = false;
 
-    const buySentTxHash = undefined;
+    const orderSentTxHash = undefined;
 
-    this.setState({paymentTxHash, buyStatus, buySentTxHash});
+    this.setState({paymentTxHash, orderStatus, orderSentTxHash});
 
     try {
-      const buyId = await this.addTicketToQueue("wert");
-      return buyId
+      const orderId = await this.addTicketToQueue();
+      return orderId
     } catch (err) {
       throw err;
     }
@@ -75,17 +107,16 @@ const Home = observer(class Home extends React.Component {
 
   addTicketToQueue = async () => {
 
-    const payMethod = "fiat"
+    const payMethod = "wert"
 
     let payload = {
-      purpose: "newticket",
-      ticketPolicyId: this.props.eventDict.ticketPolicyId,
-      ticketAssetName: this.props.eventDict.ticketAssetName,
-      ticketAmount: 1,
-      collatAdaAmount: this.props.collatRequired || 0,
+      purpose: "neworder",
+      policyId: this.props.ASSET_POLICY_ID,
+      assetName: this.props.ASSET_NAME,
+      amount: 1,
       paymentTxHash: this.state.paymentTxHash,
-      userWalletAddress: this.props.walletAddress,
-      payMethod: payMethod,
+      userWalletAddress: this.state.changeAddress,
+      payMethod,
       status: "initiated"
     };
     const req = JSON.stringify(payload);
@@ -93,19 +124,19 @@ const Home = observer(class Home extends React.Component {
     // console.log(req)
 
     try {
-      const URL = `${this.props.WERT_WEBHOOK_API}/tickets`
+      const URL = `${this.props.WERT_WEBHOOK_API}/orders`
       const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
 
       if (response.status === 201) {
 
         // console.log(response.data)
-        const ticketId = response.data?._id || undefined;
-        this.setState({ticketId});
-        return ticketId
+        const orderId = response.data?._id || undefined;
+        this.setState({orderId});
+        return orderId
 
       } else {
         // console.log(response)
-        throw Error ("could not retrieve ticketId")
+        throw Error ("could not retrieve orderId")
       }
 
     } catch (err) {
@@ -114,18 +145,18 @@ const Home = observer(class Home extends React.Component {
   }
 
 
-  updateTxHashInDB = async (ticketId, paymentTxHash) => {
+  updateTxHashInDB = async (orderId, paymentTxHash) => {
 
     let payload = {
       purpose: "updatetxhash",
-      ticketId,
+      orderId,
       paymentTxHash
     }
 
     const req = JSON.stringify(payload);
 
     try {
-      const URL = `${this.props.WERT_WEBHOOK_API}/tickets`
+      const URL = `${this.props.WERT_WEBHOOK_API}/orders`
       const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
 
       if (response.status === 200) {
@@ -146,25 +177,190 @@ const Home = observer(class Home extends React.Component {
   }
 
 
-  componentDidMount() {
+  getTicketStatusById = async (orderId) => {
 
-    this.reactionDisposer = reaction(() => {
+    const payload = {
+      what: "status",
+      orderId: orderId,
+    }
 
-      const changeAddress = this.globalState.CardanoWallet.changeAddress;
-      return changeAddress
+    const req = JSON.stringify(payload)
+    // console.log(req)
 
-    }, (changeAddress) => {
+    // TODO: change to POST, get is not working
+    try {
+      const response = await axios({
+        method: 'get',
+        url: '/orders',
+        baseURL: this.props.WERT_WEBHOOK_API,
+        params: req,
+        headers: {'Content-Type': 'application/json'},
+      })
 
-      if (changeAddress !== "") {
+      if (response.status === 200) {
 
-        this.setState({changeAddress})
+        const orderStatus = response.data?.status;
+        console.log("--- orderStatus")
+        console.log(orderStatus)
 
+        return orderStatus;
+
+      } else {
+        console.error(response)
       }
 
+    } catch(err) {
+      console.log(err)
+    }
+
+    return undefined;
+
+  }
+
+
+
+  /**
+   * Monitor ticket status in the DB and updates
+   * in the front end
+   */
+  setTicketIdState = async () => {
+
+    if (this.state.orderId) {
+
+      let status;
+      try {
+        status = await this.getTicketStatusById(this.state.orderId);
+      } catch (err) {
+        console.log(err);
+      }
+
+      let orderStatus = this.state.orderStatus;
+
+      /**
+       * Set the order status according to its state
+       * in the DB
+       */
+      if (status === "initiated") {
+        orderStatus.initiated = true;
+      } else if (status === "paid") {
+        orderStatus.processing = true;
+        orderStatus.initiated = true;
+        orderStatus.paymentDelivered = true;
+        orderStatus.orderQueued = true;
+      } else if (status === "sent") {
+        orderStatus.processing = true;
+        orderStatus.initiated = true;
+        orderStatus.paymentDelivered = true;
+        orderStatus.orderQueued = true;
+        orderStatus.orderSent = true;
+      } else if (status === "completed") {
+        orderStatus.processing = true;
+        orderStatus.initiated = true;
+        orderStatus.paymentDelivered = true;
+        orderStatus.orderQueued = true;
+        orderStatus.orderSent = true;
+        orderStatus.orderDelivered = true;
+      }
+
+      this.setState({orderStatus});
+
+      /*
+	  Get Transaction Hash of the tokens sent to wallet
+	   */
+      if (!this.state.orderSentTxHash && (status !== "completed" || status !== "sent")) {
+        try {
+          const orderSentTxHash = await this.getTicketSentTxHashById(this.state.orderId);
+          this.setState({orderSentTxHash});
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    }
+  }
+
+
+  getTicketSentTxHashById = async (orderId) => {
+
+    const payload = {
+      what: "senttxhash",
+      orderId: orderId,
+    }
+
+    const req = JSON.stringify(payload)
+
+    // TODO: change to POST, get is not working
+    try {
+      const response = await axios({
+        method: 'GET',
+        url: '/orders',
+        baseURL: this.props.WERT_WEBHOOK_API,
+        params: req,
+        headers: {'Content-Type': 'application/json'},
+      })
+
+      if (response.status === 200) {
+
+        const orderSentTxHash = response.data?.orderSentTxHash;
+        console.log("--- orderSentTxHash")
+        console.log(orderSentTxHash)
+
+        return orderSentTxHash;
+
+      } else {
+        console.error(response)
+      }
+
+    } catch(err) {
+      console.log(err)
+    }
+
+    return undefined;
+
+  }
+
+
+
+  componentDidMount() {
+
+
+    /**
+     * Sets up a loop to run every 5 seconds (5000 milliseconds) and check for
+     * status update on the ticket payment in the DB. Once
+     * the status is updated in the DB it is then reflected
+     * in the UI. The 5 seconds gap can be reduced to increase UX
+     * or increased if server performance is lacking
+     * @type {number}
+     */
+    this.runInterval  = setInterval(() => {
+      this.setTicketIdState().then(() => {});
+      // this.setTimeDiff();
+    }, 5000);
+
+
+    /**
+     * The reaction disposer is linked to the global state mobX
+     * It monitors for updates to global state and as soon as
+     * the global changes it updates the local state
+     * @type {IReactionDisposer}
+     */
+    this.reactionDisposer = reaction(() => {
+      const changeAddress = this.globalState.CardanoWallet.changeAddress;
+      return changeAddress
+    }, (changeAddress) => {
+      if (changeAddress !== "") {
+        this.setState({changeAddress})
+      }
     })
   }
 
   componentWillUnmount() {
+
+    /**
+     * the reaction disposes from mobX that monitors for global
+     * state updates needs to be disposed of once the app terminates
+     * or refresh, to avoid consuming resources and so it
+     * starts fresh the next time the app is launched
+     */
     this.reactionDisposer();
   }
 
@@ -322,7 +518,7 @@ const Home = observer(class Home extends React.Component {
                           handleWertInitiated={this.handleWertInitiated}
                           WERT_PARTNER_ID={this.state.wertPartnerId}
                           WERT_SECRET_KEY={this.state.wertPrvKey}
-                          ticketId={this.state.ticketId}
+                          orderId={this.state.orderId}
                           ticketAssetName={this.props.ASSET_NAME}
                           ticketImgSrc={this.props.ASSET_IMG_SRC || ""}
                           // eventId={this.props.eventId}
@@ -381,6 +577,95 @@ const Home = observer(class Home extends React.Component {
                         </p>
                       </div>
 
+                      {(this.state.orderStatus.processing || this.state.orderId) &&
+                          <div className="bg-gray-100 px-4 py-4 mt-8 mb-4 relative max-w-lg rounded-md">
+                            <div className="flex mb-4 text-sm">
+                              {
+                                this.state.orderStatus.initiated
+                                    ? <Icon
+                                        className="text-green-500 hover:text-green-600"
+                                        key="initiated_tick"
+                                        icon="tick"
+                                        size={16}
+                                    />
+                                    : <Spinner intent={Intent.NONE} size={SpinnerSize.SMALL} />
+                              }
+                              <div className="ml-2">Initiated</div>
+                            </div>
+                            <div className="flex mb-4 text-sm">
+                              {
+                                this.state.orderStatus.paymentDelivered
+                                    ? <Icon
+                                        className="text-green-500 hover:text-green-600"
+                                        key="paymentDelivered_tick"
+                                        icon="tick"
+                                        size={16}
+                                    />
+                                    : <Spinner intent={Intent.NONE} size={SpinnerSize.SMALL} />
+                              }
+                              <div className="ml-2">Payment Delivered</div>
+                            </div>
+                            <div className="flex mb-4 text-sm">
+                              {
+                                this.state.orderStatus.orderQueued
+                                    ? <Icon
+                                        className="text-green-500 hover:text-green-600"
+                                        key="orderQueued_tick"
+                                        icon="tick"
+                                        size={16}
+                                    />
+                                    : <Spinner intent={Intent.NONE} size={SpinnerSize.SMALL} />
+                              }
+                              <div className="ml-2">Order Queued</div>
+                            </div>
+                            <div className="flex mb-4 text-sm">
+                              {
+                                this.state.orderStatus.orderSent
+                                    ? <Icon
+                                        className="text-green-500 hover:text-green-600"
+                                        key="orderSent_tick"
+                                        icon="tick"
+                                        size={16}
+                                    />
+                                    : <Spinner intent={Intent.NONE} size={SpinnerSize.SMALL} />
+                              }
+                              <div className="ml-2">Ticket Sent</div>
+                            </div>
+                            <div className="flex text-sm">
+                              {
+                                this.state.orderStatus.orderDelivered
+                                    ? <Icon
+                                        className="text-green-500 hover:text-green-600"
+                                        key="orderDelivered_tick"
+                                        icon="tick"
+                                        size={16}
+                                    />
+                                    : <Spinner intent={Intent.NONE} size={SpinnerSize.SMALL} />
+                              }
+                              <div className="ml-2">Order Delivered</div>
+                            </div>
+
+
+                            {this.state.orderSentTxHash
+                                ?
+                                <div className="flex items-center mt-4">
+                                  <span className="bg-gray-50 text-sm mr-2">{`TxHash: ${truncate(String(this.state.orderSentTxHash) || '',30,'...')}` + " "}</span>
+                                  <Icon
+                                      className="text-gray-500 hover:text-gray-700"
+                                      key="submittedTxHash_copy"
+                                      icon="duplicate"
+                                      size={14}
+                                      onClick={() => navigator.clipboard.writeText(String(this.state.orderSentTxHash))}
+                                  />
+                                </div>
+                                :
+                                null
+                            }
+
+
+                          </div>
+                      }
+
 
                     </div>
 
@@ -405,7 +690,7 @@ const Home = observer(class Home extends React.Component {
                         holographic water.
                       </p>
                     </div>
-                    <Image src="/images/nftxyz.png" alt="nft xyz" width="700" height="700"/>
+                    <Image src="/images/nftxyz_500px.png" alt="nft xyz" width="700" height="700"/>
 
                   </div>
 

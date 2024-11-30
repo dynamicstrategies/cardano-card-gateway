@@ -20,7 +20,7 @@ class PayWithWert extends React.Component {
         this.state = {
             isOpen: false,
             signedData: undefined,
-            ticketId: undefined,
+            orderId: undefined,
             // priceUSD: undefined,
 
             wertOptions: {
@@ -33,7 +33,7 @@ class PayWithWert extends React.Component {
                 listeners: {
                     // loaded: () => console.log('wert loaded'),
                     "payment-status": (e) => {console.log(e)}
-                    // this.props.router.push(`/events?user=${this.props.walletAddress}&eventId=${this.props.eventId}&ticketId=${this.state.ticketId}`)
+                    // this.props.router.push(`/events?user=${this.props.walletAddress}&eventId=${this.props.eventId}&orderId=${this.state.orderId}`)
                 },
                 extra: {
                     item_info: {
@@ -56,12 +56,12 @@ class PayWithWert extends React.Component {
     - clientSecret is used for Stripe to process payment
     - transactionId, is updated to the DB to track payment completion
      */
-    getWertClientSecret = async (ticketId) => {
+    getWertClientSecret = async (orderId) => {
 
-        if (!ticketId) return
+        if (!orderId) return
 
         let payload = {
-            ticketId,
+            orderId,
             WERT_SECRET_KEY: this.props.WERT_SECRET_KEY,
         };
 
@@ -128,10 +128,10 @@ class PayWithWert extends React.Component {
 
 
     componentDidUpdate(prevProps) {
-        if (prevProps.ticketId !== this.props.ticketId) {
+        if (prevProps.orderId !== this.props.orderId) {
 
             // console.log("new props passed")
-            // const ticketId = this.props.ticketId
+            // const orderId = this.props.orderId
             // this.setState({adaAmount})
         }
     }
@@ -153,15 +153,16 @@ class PayWithWert extends React.Component {
                                 this.setState({isOpen: !this.state.isOpen});
 
                                 try {
-                                    // TODO: make writable to DB and get tickeId (purcahseId)
-                                    // const ticketId = await this.props.handleWertInitiated();
-                                    const ticketId = "id_123456"
-                                    const signedData = await this.getWertClientSecret(ticketId);
+                                    const orderId = await this.props.handleWertInitiated();
+                                    console.log(`orderID: ${orderId}`)
+                                    const signedData = await this.getWertClientSecret(orderId);
                                     const wertOptions = {...this.state.wertOptions, ...signedData};
-                                    wertOptions.click_id = ticketId;
+                                    wertOptions.click_id = orderId;
+                                    console.log("Wert Options")
+                                    console.log("-------------")
                                     console.log(wertOptions)
-                                    this.setState({ticketId, wertOptions});
-                                    // await this.props.updateTxHashInDB(ticketId, "");
+                                    this.setState({orderId, wertOptions});
+                                    // await this.props.updateTxHashInDB(orderId, "");
                                 } catch (err) {
                                     console.log(err);
                                 }
@@ -184,7 +185,7 @@ class PayWithWert extends React.Component {
                             useTallContent={false}
                             onClose={() => {
                                 this.setState({isOpen: !this.state.isOpen});
-                                // this.props.router.push(`/events?user=${this.props.walletAddress}&eventId=${this.props.eventId}&ticketId=${this.state.ticketId}`)
+                                // this.props.router.push(`/events?user=${this.props.walletAddress}&eventId=${this.props.eventId}&orderId=${this.state.orderId}`)
                             }}
                         >
                                 <div className={classNames(Classes.CARD, Classes.ELEVATION_4, "w-[400px] md:w-full")}>
