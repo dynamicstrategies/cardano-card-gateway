@@ -30,7 +30,7 @@ const handle = async (req, res) => {
     let statusCode;
 
 
-    console.log(req)
+    // console.log(req)
 
 
 
@@ -45,40 +45,12 @@ const handle = async (req, res) => {
 
         if (Object.keys(req.query).length && params?.what === "status" && params?.orderId) {
 
-            const orderId = params?.orderId;
+            // TODO: deprecated
 
-            console.log("--- status on orderId")
-            console.log(orderId)
-
-            try {
-                result = await Order.findById(orderId, 'status').exec();
-                console.log("--- checking order status from front-end ---")
-                console.log(result)
-                statusCode = 200;
-            } catch (err) {
-                result = err;
-                statusCode = 500;
-            }
-
-            // res.status(statusCode).json(result);
 
         } else if (Object.keys(req.query).length && params?.what === "senttxhash" && params?.orderId) {
 
-            const orderId = params?.orderId;
-
-            // console.log("--- orderId")
-            // console.log(orderId)
-
-            try {
-                result = await Order.findById(orderId, 'orderSentTxHash').exec();
-                // console.log(result)
-                statusCode = 200;
-            } catch (err) {
-                result = err;
-                statusCode = 500;
-            }
-
-            // res.status(statusCode).json(result);
+            // TODO: deprecated
 
         } else if (Object.keys(req.query).length && params?.what === "numticketssold") {
 
@@ -255,6 +227,39 @@ const handle = async (req, res) => {
 
             // console.log("--- ticket id")
             // console.log(result._id.toString())
+
+        } else if (req.body?.purpose === "get_status") {
+
+            const orderId = req.body?.orderId;
+
+            console.log("--- get status on orderId")
+            console.log(orderId)
+
+            try {
+                result = await Order.findById(orderId, 'status').exec();
+                console.log("--- checking order status from front-end ---")
+                // console.log(result)
+                statusCode = 200;
+            } catch (err) {
+                result = err;
+                statusCode = 500;
+            }
+
+        } else if (req.body?.purpose === "get_senttxhash") {
+
+            const orderId = req.body?.orderId;
+
+            // console.log("--- orderId")
+            // console.log(orderId)
+
+            try {
+                result = await Order.findById(orderId, 'orderSentTxHash').exec();
+                // console.log(result)
+                statusCode = 200;
+            } catch (err) {
+                result = err;
+                statusCode = 500;
+            }
 
         } else if (req.body?.purpose === "updatetxhash" ) {
 

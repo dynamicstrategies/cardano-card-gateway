@@ -177,25 +177,31 @@ const Home = observer(class Home extends React.Component {
   }
 
 
+
+
   getTicketStatusById = async (orderId) => {
 
+
     const payload = {
-      what: "status",
+      purpose: "get_status",
       orderId: orderId,
     }
 
     const req = JSON.stringify(payload)
     // console.log(req)
 
-    // TODO: change to POST, get is not working
     try {
-      const response = await axios({
-        method: 'get',
-        url: '/orders',
-        baseURL: this.props.WERT_WEBHOOK_API,
-        params: req,
-        headers: {'Content-Type': 'application/json'},
-      })
+
+      const URL = `${this.props.WERT_WEBHOOK_API}/orders`
+      const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
+
+      // const response = await axios({
+      //   method: 'get',
+      //   url: '/orders',
+      //   baseURL: this.props.WERT_WEBHOOK_API,
+      //   params: req,
+      //   headers: {'Content-Type': 'application/json'},
+      // })
 
       if (response.status === 200) {
 
@@ -282,21 +288,24 @@ const Home = observer(class Home extends React.Component {
   getTicketSentTxHashById = async (orderId) => {
 
     const payload = {
-      what: "senttxhash",
+      purpose: "get_senttxhash",
       orderId: orderId,
     }
 
     const req = JSON.stringify(payload)
 
-    // TODO: change to POST, get is not working
     try {
-      const response = await axios({
-        method: 'GET',
-        url: '/orders',
-        baseURL: this.props.WERT_WEBHOOK_API,
-        params: req,
-        headers: {'Content-Type': 'application/json'},
-      })
+
+      const URL = `${this.props.WERT_WEBHOOK_API}/orders`
+      const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
+
+      // const response = await axios({
+      //   method: 'GET',
+      //   url: '/orders',
+      //   baseURL: this.props.WERT_WEBHOOK_API,
+      //   params: req,
+      //   headers: {'Content-Type': 'application/json'},
+      // })
 
       if (response.status === 200) {
 
