@@ -278,6 +278,12 @@ This should only be used for testing
 
 ### 3.1 - Prerequisites
 
+> [!IMPORTANT]  
+> Working knowledge of Javascript frontend and backend is required to progress through this codebase
+> Basic familiarity is also assumed with MongoDB, DevOps and particulary Docker, and Cardano and EVM blockchain
+> concepts
+
+
 To develop on the codebase and launch the project you will need:
 - A Javascript desktop development environment IDE. We tend to prefer `WebStorm` by IntelliJ for all our needs
 - A linux server, capable of running Docker containers and accessible from the web

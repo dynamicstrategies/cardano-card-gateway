@@ -51,6 +51,25 @@ const HOT_WALLET_PRVKEY = process.env.HOT_WALLET_PRVKEY
 const NETWORK = process.env.NETWORK
 const EVM_RPC = process.env.EVM_RPC
 
+/**
+ * Truncates the string to a given number of character and
+ * has a custom separator
+ */
+const truncate = (fullStr, strLen, separator) => {
+    if (fullStr === undefined || fullStr.length <= strLen) return fullStr;
+
+    separator = separator || '...';
+
+    const sepLen = separator.length;
+    const charsToShow = strLen - sepLen
+    const frontChars = Math.ceil(charsToShow/2);
+    const backChars = Math.floor(charsToShow/2);
+
+    return fullStr.substr(0, frontChars) +
+        separator +
+        fullStr.substr(fullStr.length - backChars);
+}
+
 const truncAddress = truncate(HOT_WALLET_ADDRESS, 25, "..")
 
 console.table({
@@ -327,24 +346,7 @@ const incrementRetries = async (orderIdObj) => {
 
 }
 
-/**
- * Truncates the string to a given number of character and
- * has a custom separator
- */
-const truncate = (fullStr, strLen, separator) => {
-    if (fullStr === undefined || fullStr.length <= strLen) return fullStr;
 
-    separator = separator || '...';
-
-    const sepLen = separator.length;
-    const charsToShow = strLen - sepLen
-    const frontChars = Math.ceil(charsToShow/2);
-    const backChars = Math.floor(charsToShow/2);
-
-    return fullStr.substr(0, frontChars) +
-        separator +
-        fullStr.substr(fullStr.length - backChars);
-}
 
 /**************************************
  2 - Check that payment has been received
