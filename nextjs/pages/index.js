@@ -25,6 +25,7 @@ export const getServerSideProps = async (ctx) => {
   const ASSET_POLICY_ID = process.env.ASSET_POLICY_ID
   const ASSET_NAME = process.env.ASSET_NAME;
   const ASSET_IMG_SRC = process.env.ASSET_IMG_SRC;
+  const EVM_SC_ADDRESS = process.env.EVM_SC_ADDRESS;
 
   return {
     props: {
@@ -32,6 +33,7 @@ export const getServerSideProps = async (ctx) => {
       ASSET_POLICY_ID,
       ASSET_NAME,
       ASSET_IMG_SRC,
+      EVM_SC_ADDRESS,
     }
   }
 }
@@ -117,7 +119,7 @@ const Home = observer(class Home extends React.Component {
       paymentTxHash: this.state.paymentTxHash,
       userWalletAddress: this.state.changeAddress,
       payMethod,
-      status: "initiated"
+      status: "initiated",
     };
     const req = JSON.stringify(payload);
 

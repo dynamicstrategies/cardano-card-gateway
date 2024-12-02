@@ -7,13 +7,15 @@ const TICKET_WALLET_ID = "abc123456"
 const WALLET_API_URL = process.env.WALLET_API_URL
 const MONGODB_URL = process.env.MONGODB_URL;
 const MONGODB_DB = process.env.MONGODB_DB;
+const ASSET_POL_PRICE = process.env.ASSET_POL_PRICE;
+const EVM_SC_ADDRESS = process.env.EVM_SC_ADDRESS;
 
 const DB_URL = `${MONGODB_URL}/${MONGODB_DB}`;
 
 let connection;
 
 try {
-    connection = mongoose.createConnection(DB_URL,{maxPoolSize: 10, useNewUrlParser: true, useUnifiedTopology: true});
+    connection = mongoose.createConnection(DB_URL,{maxPoolSize: 10});
     console.log('new DB connection established')
 } catch(err) {
     console.log(err)
@@ -185,6 +187,15 @@ const handle = async (req, res) => {
         // console.log(req.body)
         const Order = connection.model('Order', OrderSchema);
 
+        /**
+         * Back end API to process new orders from the front-end
+         * The majority of the parameters comes from the front-end
+         * and then it is complemented by 2 parameteres from
+         * the environment variables:
+         * - Price in Pol tokens
+         * - Address of the EVM smart contract into which
+         * the payment is sent
+         */
         if (req.body?.purpose === "neworder" ) {
             const {
                 policyId,
@@ -199,6 +210,8 @@ const handle = async (req, res) => {
             const timestamp = Date.now();
             let results = {};
 
+            const priceInPol = ASSET_POL_PRICE;
+            const evmContractAddress = EVM_SC_ADDRESS;
 
             const orderDict = {
                 policyId,
@@ -210,6 +223,8 @@ const handle = async (req, res) => {
                 status,
                 createdDateTime: timestamp,
                 timestamp,
+                evmContractAddress,
+                priceInPol,
             }
 
 

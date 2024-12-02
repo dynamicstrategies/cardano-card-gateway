@@ -9,7 +9,7 @@ const DB_URL = `${MONGODB_URL}/${MONGODB_DB}`;
 
 let connection;
 try {
-    connection = mongoose.createConnection(DB_URL,{maxPoolSize: 10, useNewUrlParser: true, useUnifiedTopology: true});
+    connection = mongoose.createConnection(DB_URL,{maxPoolSize: 10});
     console.log('new DB connection established')
 } catch(err) {
     console.log(err)

@@ -3,13 +3,13 @@ version: "3.5"
 services:
   TESTNET_cgateway_mongodb:
     container_name: TESTNET_cgateway_mongodb
-    image: mongo:latest
-    #    command: bash -c "mongod --repair"
+    image: mongo:6.0.19
+    command: mongod --port 27047
     restart: always
     volumes:
       - mongodb-cgateway:/data/db
     ports:
-      - 127.0.0.1:27047:27017
+      - 127.0.0.1:27047:27047
 
   TESTNET_cgateway_nextjs:
     image: dynamicstrategiesio/general:cardgateway_testnet
@@ -23,13 +23,30 @@ services:
       - ASSET_POLICY_ID=8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d
       - ASSET_NAME=NeoWindsurfer
       - ASSET_IMG_SRC=https://res.cloudinary.com/dgxb2zyjd/image/upload/v1732471040/nftxyz_500px_d6ucka.png
-      - WERT_WEBHOOK_API=http://localhost:3000/api
+      - WERT_WEBHOOK_API=https://cardgateway.work.gd/api
       - WERT_FEE_PERC=0.04
       - WERT_COMMODITY=POL
       - WERT_NETWORK=amoy
       - WERT_PAYTO_WALLET=0x36A3dBc3818443067C1383981d3B4117A22BE7F3
     depends_on:
       - TESTNET_cgateway_mongodb
+
+  TESTNET_cgateway_daemon:
+    image: dynamicstrategiesio/general:cardgateway_testnet_daemon
+    environment:
+      - NETWORK=preview
+      - MONGODB_URL=mongodb://TESTNET_cgateway_mongodb:27047
+      - MONGODB_DB=cgateway
+      - HOT_WALLET_ADDRESS=addr_test1qpuqx79hzrr8flmmv36v5y70t8y0hk56lhlk9aef6dvucnfq8cwsskf0gc28ckggm8s6e4scfvx9vtfkjgn6psgzwr3q0u93y9
+      - HOT_WALLET_PRVKEY=intentionalmissing
+      - EVM_RPC=https://rpc.ankr.com/polygon_amoy
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        compress: "true"
+        max-file: "10"
+        max-size: "50m"
 
 volumes:
   mongodb-cgateway:

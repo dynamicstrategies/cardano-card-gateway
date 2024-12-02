@@ -3,7 +3,8 @@ import { signSmartContractData } from '@wert-io/widget-sc-signer';
 const WERT_COMMODITY = process.env.WERT_COMMODITY;
 const WERT_NETWORK = process.env.WERT_NETWORK;
 const WERT_PAYTO_WALLET = process.env.WERT_PAYTO_WALLET;
-
+const EVM_SC_ADDRESS = process.env.EVM_SC_ADDRESS;
+const ASSET_POL_PRICE = process.env.ASSET_POL_PRICE;
 
 const handle = async (req, res) => {
 
@@ -14,11 +15,10 @@ const handle = async (req, res) => {
         let statusCode;
 
         const {orderId, WERT_SECRET_KEY} = req.body;
-        console.log(orderId)
+        // console.log(orderId)
 
-        // let priceUSD;
-        const pricePOL = 2.5;
-        const evmSmartContractAddr = "0xDB6Ca39D1A2074d2fd90a5aA69F8985Ae81311fc";
+        const pricePOL = Number(ASSET_POL_PRICE);
+        const evmSmartContractAddr = EVM_SC_ADDRESS;
         const evmSmartContractCallData = "0x6a62784200000000000000000000000080663d068d4d39173aa17bd16acf3d37555d6aab";
 
         /*
@@ -37,10 +37,7 @@ const handle = async (req, res) => {
                 sc_input_data: evmSmartContractCallData,
             }, WERT_SECRET_KEY);
 
-
             result = {signedData, pricePOL};
-            // console.log(paymentIntent.id)
-
             statusCode = 200;
 
         } catch(err) {
