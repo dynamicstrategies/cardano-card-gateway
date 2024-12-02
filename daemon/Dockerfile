@@ -1,4 +1,4 @@
-FROM keymetrics/pm2:16-alpine
+FROM keymetrics/pm2:18-alpine
 
 # Bundle APP files
 COPY daemons/SendOrders.js daemons/SendOrders.js
@@ -7,7 +7,7 @@ COPY ecosystem.config.js .
 
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
-RUN npm install --production
+RUN npm install --omit=dev
 #RUN npm audit fix
 
 # Expose the listening port of your app
@@ -20,13 +20,13 @@ CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
 
 ##########################
 # Build the docker image
-#sudo docker build . -t dynamicstrategiesio/general:cardgateway_testnet_daemon
-#sudo docker push dynamicstrategiesio/general:cardgateway_testnet_daemon
+# sudo docker build . -t dynamicstrategiesio/general:cardgateway_testnet_daemon
+# sudo docker push dynamicstrategiesio/general:cardgateway_testnet_daemon
 
 ##########################
 # Create Docker Container
 ##########################
-#sudo docker run -it dynamicstrategiesio/general:cardgateway_testnet_daemon
+# sudo docker run -it dynamicstrategiesio/general:cardgateway_testnet_daemon
 
 ###########
 # Monitor

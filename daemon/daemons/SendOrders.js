@@ -42,7 +42,6 @@
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
 const {KoiosProvider, MeshWallet, MeshTxBuilder} = require("@meshsdk/core");
-const {truncate} = require("../utils");
 const {ethers} = require("ethers");
 
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -328,6 +327,24 @@ const incrementRetries = async (orderIdObj) => {
 
 }
 
+/**
+ * Truncates the string to a given number of character and
+ * has a custom separator
+ */
+const truncate = (fullStr, strLen, separator) => {
+    if (fullStr === undefined || fullStr.length <= strLen) return fullStr;
+
+    separator = separator || '...';
+
+    const sepLen = separator.length;
+    const charsToShow = strLen - sepLen
+    const frontChars = Math.ceil(charsToShow/2);
+    const backChars = Math.floor(charsToShow/2);
+
+    return fullStr.substr(0, frontChars) +
+        separator +
+        fullStr.substr(fullStr.length - backChars);
+}
 
 /**************************************
  2 - Check that payment has been received
