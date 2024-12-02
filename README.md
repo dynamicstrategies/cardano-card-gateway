@@ -70,7 +70,7 @@ access the page by providing the wertPartnerId and wertPrvKey in the url like th
 #### Shopfront
 
 Below is an example printscreen of a shopfront displaying a Digital Asset,
-a Wallet Connector to connect to the user's Cardan Wallet and the Payment processor.
+a Wallet Connector to connect to the user's Cardano Wallet and the Payment processor.
 When a user pressed the "Pay with Card" button this will launch the payment processor
 shown in the next step
 
@@ -79,7 +79,7 @@ shown in the next step
 #### Payment Processor
 
 The credit card payments are handle by <a href="https://wert.io/">Wert.io</a> and the code based in
-this repo implemnents the connection between an example webiste and their payment
+this repo implements the connection between an example website and their payment
 processing services. Additionally, they only provide automation for payments of digital assets
 minted on EVM blockchains, so an additional functionality is implemented that monitors for
 minting of these assets on the EVM chain and sends the user of the asset on the Cardano blockchain
