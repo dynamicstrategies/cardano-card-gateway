@@ -296,7 +296,7 @@ directories
 Clone the github repo and install the components for local development. Then build the docker containers and deploy
 with Docker Compose.
 
-1. Clone the repo
+#### 3.2.1 - Clone the repo
    
   ```sh
    git clone https://github.com/dynamicstrategies/cardano-card-gateway.git
@@ -309,7 +309,7 @@ The code base is split into 3 sections, each one with its own folder:
 - `/evm_sc` with the EVM Smart Contract template
 
 
-2. Install NPM packages
+#### 3.2.2 - Install NPM packages
 
 To install the frontend from the main directory
    ```sh
@@ -322,8 +322,8 @@ To install the backend services from the main directory
    cd daemon
    npm install
    ```
-   
-3. Run the dev environment
+
+#### 3.2.3 - Run the dev environment
 
 Check and adjust the Enviroment variables for your set-up. When running in development these are stored in
 `.env` files in `\nextjs` and the `\daemon` folders. And when running in docker containers these are set in
@@ -344,9 +344,111 @@ the users
    ```
 
 
-4. Build docker containers
+#### 3.2.4 - Build docker containers
 
-...
+There are 2 docker container to build.
+
+Docker file with the definition for NextJS is located at `/nextjs/Docker` and the build and upload instructions are:
+
+``` dockerfile
+sudo docker build . -t <<your_account>>/general:cardgateway_testnet
+sudo docker push <<your_account>>/general:cardgateway_testnet
+```
+
+Docker file with the definition for NextJS is located at `/daemon/Docker` and the build and upload instructions are:
+
+``` dockerfile
+sudo docker build . -t <<your_account>>/general:cardgateway_testnet_daemon
+sudo docker push <<your_account>>/general:cardgateway_testnet_daemon
+```
+
+You will need an account with `https://www.docker.com/` and replace `<<your_account>>` with your account name to where
+the docker files are uploaded. Then also don't forget to change the account name in the `docker-compose.yml` file
+
+#### 3.2.5 - Deploying
+
+Deployment with docker compose. Create a directory on your linux server, copy over the content of the `docker-compose.yml` file
+and adjust the enviroment variables. The purpose of each variable is discussed in a separate section in this manual).
+
+Example content of the docker compose file
+
+```yml
+version: "3.5"
+
+services:
+  TESTNET_cgateway_mongodb:
+    container_name: TESTNET_cgateway_mongodb
+    image: mongo:6.0.19
+    command: mongod --port 27047
+    restart: always
+    volumes:
+      - mongodb-cgateway:/data/db
+    ports:
+      - 127.0.0.1:27047:27047
+
+  TESTNET_cgateway_nextjs:
+    image: dynamicstrategiesio/general:cardgateway_testnet
+    container_name: TESTNET_cgateway_nextjs
+    restart: always
+    ports:
+      - 127.0.0.1:6075:3000
+    environment:
+      - MONGODB_URL=mongodb://TESTNET_cgateway_mongodb:27047
+      - MONGODB_DB=cgateway
+      - ASSET_POLICY_ID=8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d
+      - ASSET_NAME=NeoWindsurfer
+      - ASSET_IMG_SRC=https://res.cloudinary.com/dgxb2zyjd/image/upload/v1732471040/nftxyz_500px_d6ucka.png
+      - WERT_WEBHOOK_API=https://cardgateway.work.gd/api
+      - WERT_FEE_PERC=0.04
+      - WERT_COMMODITY=POL
+      - WERT_NETWORK=amoy
+      - WERT_PAYTO_WALLET=<<insert_your_wallet_address_on_evm>>
+    depends_on:
+      - TESTNET_cgateway_mongodb
+
+  TESTNET_cgateway_daemon:
+    image: dynamicstrategiesio/general:cardgateway_testnet_daemon
+    environment:
+      - NETWORK=preview
+      - MONGODB_URL=mongodb://TESTNET_cgateway_mongodb:27047
+      - MONGODB_DB=cgateway
+      - HOT_WALLET_ADDRESS=<<insert_cardano_wallet_address>>
+      - HOT_WALLET_PRVKEY=<<insert_wallet_private_key>>
+      - EVM_RPC=https://rpc.ankr.com/polygon_amoy
+    restart: always
+    logging:
+      driver: "json-file"
+      options:
+        compress: "true"
+        max-file: "10"
+        max-size: "50m"
+
+volumes:
+  mongodb-cgateway:
+
+```
+
+
+The to launch the docker container as defined in the .yml file you can run the following commands:
+
+```shell
+sudo docker-compose pull
+sudo docker-compose up -d
+```
+Then yous should see on screen that docker containers are being launched.
+After this run
+
+```shell 
+sudo docker ps
+```
+
+to check that the container are running
+
+And you can monitor the running of each docker container with, replacing <<container_id>> with your container id:
+
+```shell
+sudo docker logs --follow --tail 500 <<container_id>>
+```
 
 <!-- USAGE EXAMPLES -->
 ## 4 - Usage
