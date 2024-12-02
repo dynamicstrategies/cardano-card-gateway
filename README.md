@@ -7,12 +7,7 @@
   <a href="https://github.com/othneildrew/Best-README-Template">
     <img src="nextjs/public/images/cardano_logo.png" alt="Logo" width="320" height="65">
   </a>
-
-<h3 align="center">Cardano Card Gateway</h3>
-<a href="https://cardgateway.work.gd">Demo</a>
 </div>
-
-
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -64,6 +59,13 @@ suggested enhancement via the issue tracker
 ### Demo
 Demo of a sample shop-front with a "Pay with Card" button will be shown here 
 <a href="https://cardgateway.work.gd">cardgateway.work.gd</a>
+
+> [!IMPORTANT]  
+> To test payment lifecycle you will need to registed for a sandbox account with Wert.io and then
+access the page by providing the wertPartnerId and wertPrvKey in the url like this
+> 
+> `https://cardgateway.work.gd/front?wertPartnerId=<<your_wert_partner_id>>&wertPrvKey=<<your_wert_private_key>>`
+
 
 #### Shopfront
 
