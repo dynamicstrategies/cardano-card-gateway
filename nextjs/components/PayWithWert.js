@@ -162,7 +162,6 @@ class PayWithWert extends React.Component {
                                     console.log("-------------")
                                     console.log(wertOptions)
                                     this.setState({orderId, wertOptions});
-                                    // await this.props.updateTxHashInDB(orderId, "");
                                 } catch (err) {
                                     console.log(err);
                                 }

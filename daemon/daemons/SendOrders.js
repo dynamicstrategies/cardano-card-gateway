@@ -3,18 +3,45 @@
  * on the Cardano Network. It is organized in 5 steps:
  *
  * 1 - Initialize connections to the database, connect to a Cardano blockchain
- * indexed (e.g. Koios https://koios.rest/) and set-up a wallet from where to
- * send transactions. This is very much prep work
+ * indexed (e.g. Koios https://koios.rest/), and set-up a wallet from where to
+ * send transactions. And a connection to the EVM blockchain to monitor that payment
+ * iss delivered into the smart contract
  *
  * 2 - Check that payment has been received for the assets. This is done by
- * checking periodically (e.g. every 5 seconds) the status of all orders
- * that have been registered in the database
+ * periodically checking (e.g. every 5 seconds) the status of all orders
+ * that have been registered in the database. And then for the orders
+ * where the payment processor has confirmed payment, further check by
+ * querying the EVM transaction that it was done with the right smart contract
+ * and for the right amount
  *
- * 3 -
+ * 3 - Once the payment has been confirmed by the payment processor
+ * and independently checked on the EVM blockchain by the daemon, the next step
+ * is to build the transaction and send it to the user's Cardano wallet
+ *
+ * 4 - Continuously check for order delivery to the user by checking
+ * the state of the transaction on the Cardano blockchain. Once the
+ * transaction has been confirmed, update the DB. This will then
+ * be picked up by the frontend and shown to the user that the transaction
+ * has been delivered to their wallet
+ *
+ * 5 - Check for transactions that have been pending for a long time and
+ * mark those for which payment has not been received in 24 hours as failed
+ * After this point the daemon will stop continuously checking for their
+ * status
+ *
+ * memo: the order status has 5 stages:
+ * - initiated - when the user has requested to Pay with Card for an order
+ * - transfer_started - when payment processor received the order
+ * - paid - when user paid for the order and payment processor has paid you
+ * - sent - when the ticket has been sent to the user into their Cardano wallet
+ * - delivered - when the order has been delivered to the user's Cardano wallet
+ *
+ * The script monitors for each of the above stages
+ * It sends the ticket only when payment has been received
  */
 require('dotenv').config()
 const { MongoClient } = require('mongodb');
-const {KoiosProvider, MeshWallet, Transaction, MeshTxBuilder} = require("@meshsdk/core");
+const {KoiosProvider, MeshWallet, MeshTxBuilder} = require("@meshsdk/core");
 const {truncate} = require("../utils");
 const {ethers} = require("ethers");
 
@@ -39,17 +66,7 @@ console.table({
  * How many milliseconds to look back in time
  * when processing newly created orders
  */
-
 const MAX_LOOKBACK_MS = 24*60*60*1000; // 24h
-
-
-/************************
- connect to the database
- */
-const uri = MONGODB_URL || 'mongodb://cardgateway.work.gd:27048';
-const dbName = MONGODB_DB || 'cgateway';
-
-const client = new MongoClient(uri);
 
 let db;
 let orders;
@@ -59,9 +76,13 @@ let evmProvider;
 
 
 /**
- * Connect to the DB that stores the status of all orders
+ * 1.1 - Initialize the connection to the DB that stores the status of all orders
  * this DB is used extensively in the rest of the code
  */
+const uri = MONGODB_URL || 'mongodb://localhost:27048';
+const dbName = MONGODB_DB || 'cgateway';
+const client = new MongoClient(uri);
+
 connectToDB = async () => {
     try {
         await client.connect();
@@ -76,71 +97,99 @@ connectToDB = async () => {
 connectToDB();
 
 
-
+/**
+ * 1.2 - Initialized an instance of the Cardano Hot wallet
+ * that holds the digital assets being sold on the frontend
+ * The MeshJS library is used to create the wallet and send
+ * transactions.
+ *
+ * The Koios Cardano blockchain indexer is used to send and
+ * query the status of transactions on the Cardano blockchain.
+ * The indexer is initialized here also using the MeshJS library
+ */
 initHotWallet = async () => {
 
     blockchainProvider = new KoiosProvider(NETWORK);
     const networkId = NETWORK === "preview" ? "0" : NETWORK === "preprod" ? "0" : "1"
 
-    walletObj = new MeshWallet({
-        networkId,
-        fetcher: blockchainProvider,
-        submitter: blockchainProvider,
-        key: {
-            type: 'root',
-            bech32: HOT_WALLET_PRVKEY,
-        },
-    });
+    try {
+        walletObj = new MeshWallet({
+            networkId,
+            fetcher: blockchainProvider,
+            submitter: blockchainProvider,
+            key: {
+                type: 'root',
+                bech32: HOT_WALLET_PRVKEY,
+            },
+        });
+    } catch (err) {
+        console.log("Could not Initialize the Hot Wallet with MeshJS. Check the Private Key environment variable")
+        console.error(err)
+    }
+
 
 }
-
 
 initHotWallet();
 
 
+/**
+ * 1.3 - Initialize the connection to an EVM blockchain indexer
+ * It connects to the Polygon network and is used to check
+ * that payments have been recived in the EVM smart contract.
+ * Uses the Ethers library
+ *
+ */
 initEvmProvider = async () => {
-
     evmProvider = new ethers.JsonRpcProvider(EVM_RPC);
-
 }
 
 initEvmProvider();
 
 
-/*
-Order status has 4 stages:
-- initiated - when the user has requested the ticket
-- paid - when user paid for the ticket and payment has arrived
-- sent - when the ticket has been sent to the user + collateral
-- delivered - when the tickets + collateral has been delivered
 
-The script monitors for each of the above stages
-It sends the ticket only when payment has been received
+/**
+ * Helper functions that interact with the DB
+ *
+ * - findOrders - finds orders in the DB with specific status and age
+ *
+ * - updateStatusToPaymentConfirmed - updates the order field "paymentConfirmed" to true
+ * this is done after checking that the smart contract has received the correct amount
+ * from the payment processor Wert.io
+ *
+ * - updateStatusToSent - update the status of and order to "sent". In this sate the
+ * asset should be registered on the Cardano blockchain and en-route to the user's wallet
+ *
+ * - updateStatusToCompleted - updates the status of an order to "completed" which means
+ * the asset has been sent to the user's wallet and has been delivered, by
+ * checking that the transaction was included in a block.
+ *
+ * - checkTxHashOnBlockchain - queries the Cardano blockchain if the transaction has been
+ * included in a block
+ *
+ *  - checkEVMPaymentCompletion - Check that the payment was made to the correct EVM contract
+ * and that the pay amount was of at least the price that was expected
+ *
+ * - incrementRetries - increments the field "retries" by 1 in the DB. This is to keep track how
+ * many times the daemon has gone through the order in its current status. Useful for
+ * debugging if an order has been stuck in a state for a long time
  */
-
-
 const findOrders = async (withStatus, limit) => {
 
     const query = {
         status: withStatus,
         createdDateTime : {"$gt" : new Date(Date.now() - MAX_LOOKBACK_MS) }
     }
-    // const options = {
-    //     sort: {timestamp: 1}
-    // }
 
     try {
         const docs = await orders.find(query).limit(limit).sort({timestamp: 1})
         const docsArr = docs.toArray();
-        // console.log(doc)
         return docsArr
     } catch (err) {
         console.log(err)
         throw err
     }
-
 }
-
 
 
 const updateStatusToPaymentConfirmed = async (orderIdObj) => {
@@ -156,7 +205,6 @@ const updateStatusToPaymentConfirmed = async (orderIdObj) => {
 
     try {
         const doc = await orders.updateOne(query, options)
-        // console.log(doc)
         return doc
     } catch (err) {
         console.log(err)
@@ -178,7 +226,6 @@ const updateStatusToSent = async (orderIdObj, txHash) => {
 
     try {
         const doc = await orders.updateOne(query, options)
-        // console.log(doc)
         return doc
     } catch (err) {
         console.log(err)
@@ -210,28 +257,53 @@ const updateStatusToCompleted = async (orderIdObj) => {
 
 const checkTxHashOnBlockchain = async (txHash) => {
 
-
     try {
 
         const response = await blockchainProvider.fetchTxInfo(txHash);
         const slotN = response?.slot || undefined
 
         if (slotN) {
-            console.log(`Tx ${txHash} included in the slot ${slotN}`);
+            console.log(`3 - Tx ${txHash} included in the slot ${slotN}`);
             return true
         } else {
-            console.log(`Tx ${txHash} not yet on the blockchain`)
+            // console.log(`Tx ${txHash} not yet on the blockchain`)
             return false
         }
 
     } catch (err) {
         if (err = "[]") {
-            console.log(`Tx ${txHash} not yet on the blockchain`)
+            // console.log(`Tx ${txHash} not yet on the blockchain`)
             return false
         } else {
            throw err
         }
+    }
+}
 
+
+const checkEVMPaymentCompletion = async (evmTxHash, evmContractAddress, priceInPol) => {
+
+    try {
+        const evmTx = await evmProvider.getTransaction(evmTxHash);
+
+        /**
+         * Check that the payment was made to the correct EVM contract
+         * and that the pay amount was of at least the price that
+         * was expected
+         */
+        if (
+            evmTx.value >= priceInPol * 1e18 &&
+            evmTx.to &&
+            evmContractAddress.toLowerCase() === evmTx.to.toLowerCase()
+        ) {
+            return true
+        } else {
+            return false
+        }
+
+    } catch (err) {
+        console.error(err)
+        return false
     }
 
 }
@@ -258,12 +330,11 @@ const incrementRetries = async (orderIdObj) => {
 
 
 /**************************************
- 1 - Check that payment has been received
+ 2 - Check that payment has been received
  *************************************/
 const checkForPaymentReceived = async () => {
 
     let docs;
-
 
     try {
         docs = await findOrders('paid', 99999);
@@ -294,38 +365,14 @@ const checkForPaymentReceived = async () => {
             continue
         }
 
-        /**
-        * Check if payment received:
-        * - on blockchain if was a payment in ada
-        * - in payment provider if was with fiat
-         */
+
         let isPaymentSuccess = false;
         const payMethod = doc.payMethod;
 
 
         if (payMethod === "wert") {
 
-            try {
-                const evmTx = await evmProvider.getTransaction(txHash);
-                const evmContractAddress = doc?.evmContractAddress;
-                const priceInPol = doc?.priceInPol;
-
-                /**
-                 * Check that the payment was made to the correct EVM contract
-                 * and that they pay amount was of at least the price that
-                 * was expected
-                 */
-                if (
-                    evmTx.value >= priceInPol * 1e18 &&
-                    evmTx.to &&
-                    evmContractAddress.toLowerCase() === evmTx.to.toLowerCase()
-                ) {
-                    isPaymentSuccess = true
-                }
-
-            } catch (err) {
-                console.error(err)
-            }
+            isPaymentSuccess = await checkEVMPaymentCompletion(txHash, doc?.evmContractAddress, doc?.priceInPol)
 
         }
 
@@ -360,12 +407,13 @@ const checkForPaymentReceived = async () => {
 }
 
 /**************************************
- 2 - Send the ticket to user
+ 3 - Send the ticket to user
  *************************************/
 const sendOrder = async () => {
 
-    /*
-    Find a ticket in the queue
+    /**
+     * Find an order in the queue where the payment processor updated
+     * status to paid
      */
     let docs;
 
@@ -382,14 +430,21 @@ const sendOrder = async () => {
         return
     }
 
-    const doc = docs[0];
+    /**
+     * Find a doc that has had its payment confirmed on the
+     * EVM blockchain
+     */
+    let doc;
+    for (const x of docs) {
+        if (x?.paymentConfirmed) {
+            doc = x;
+            break
+        }
+    }
 
     const orderIdObj = doc._id
     const orderIdStr = orderIdObj.toString();
 
-    /*
-    Send a ticket
-     */
     const assetNameHex = Buffer.from(doc.assetName, "utf8").toString("hex");
     const {userWalletAddress, policyId, amount} = doc
 
@@ -462,7 +517,7 @@ const sendOrder = async () => {
 
 
 /**************************************
- 3 - Check order delivery
+ 4 - Check order delivery
  *************************************/
 
 const checkForDeliveredOrders = async () => {
@@ -523,7 +578,7 @@ const checkForDeliveredOrders = async () => {
 }
 
 /**************************************
- 4 - Check failed tickets
+ 5 - Check failed tickets
  *************************************/
 
 const checkForFailedTickets = async () => {

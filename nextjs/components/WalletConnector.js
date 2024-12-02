@@ -228,7 +228,7 @@ const WalletConnector = observer(class WalletConnector extends React.Component {
                                 <div className={classNames(Classes.CARD, Classes.ELEVATION_4)}>
                                     <H3>Select Wallet to Connect</H3>
                                     <p>
-                                        Choose which wallet you want to connect to. You will then be able to interact with DApp. If you don&apos;t have a wallet installed then you will need to install one of these - Nami, Eternl or Flint
+                                        Choose which wallet you want to connect to. You will then be able to interact with DApp. If you don&apos;t have a wallet installed then you will need to install Nami or the Eternl web wallet.
                                     </p>
                                     <div style={{marginTop: "20px"}}>
 
