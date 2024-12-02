@@ -105,20 +105,20 @@ Other Cardano wallets can be added few lines of code.
 The environment variable controls the execution of the component and needs to be adjusted for every implementation
 The list of environment variables and their purpose is described in this table
 
-| **Environment Variable** | **Description** | **Example**                                              |
-|---|---|----------------------------------------------------------|
-| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name | mongodb://localhost:27048                                |
-| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist | cgateway                                                 |
-| ASSET_POLICY_ID | PolicyID of the Asset name on the Cardano blockchain that is being sold on the  storefront. This asset will be delivered to the user | 8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d |
-| ASSET_NAME | Asset Name on the Cardano blockchain from the policy Id above that is being sold on the  storefront. This asset will be delivered to the user | NeoWindsurfer                                            |
-| ASSET_IMG_SRC | Image of the Asset to display during the check-out in the payment processor's screen | https://res.cloudinary.com/.../nftxyz_500px_d6ucka.png   |
-| WERT_WEBHOOK_API | The path to the API services, most of the time can be left unchanged | http://localhost:3000/api                                |
-| WERT_FEE_PERC | The amount that is paid to the payment processor as a fee. This will be determined in the contract that will need to be signed with the payment processor before going live on the mainnet | 0.04                                                     |
-| WERT_COMMODITY | The token symbol which will be transferred to you by the payment processor (wert.io) when users purchase digital assets through the storefront | POL                                                      |
-| WERT_NETWORK | The name of the network on the Polygon blockchain where the payments will be made to (e.g. Polygon Amoy is the testnet) | amoy                                                     |
-| WERT_PAYTO_WALLET | Your wallet address on the Poolygon blockchain where the minted Digital Assets will be sent when the user makes a purchase in the storefront | 0x36A3dBc3818443067C1383981d3B4117A22BE7F3               |
-| EVM_SC_ADDRESS | The EVM smart contract address on the Polygon blockchain into which the payment processor will make the payment | 0xDB6Ca39D1A2074d2fd90a5aA69F8985Ae81311fc               |
-| ASSET_POL_PRICE | The price of the Digital Asset being sold on the storefront. The price needs to be given in POL tokens | 2.5                                                      |
+| **Environment Variable** | **Description** | **Example**                             |
+|---|---|-----------------------------------------|
+| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name | mongodb://localhost:27048               |
+| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist | cgateway                                |
+| ASSET_POLICY_ID | PolicyID of the Asset name on the Cardano blockchain that is being sold on the  storefront. This asset will be delivered to the user | 8b6e0...289e1c8d                        |
+| ASSET_NAME | Asset Name on the Cardano blockchain from the policy Id above that is being sold on the  storefront. This asset will be delivered to the user | NeoWindsurfer                           |
+| ASSET_IMG_SRC | Image of the Asset to display during the check-out in the payment processor's screen | https://res.cloudinary.com/...6ucka.png |
+| WERT_WEBHOOK_API | The path to the API services, most of the time can be left unchanged | http://localhost:3000/api               |
+| WERT_FEE_PERC | The amount that is paid to the payment processor as a fee. This will be determined in the contract that will need to be signed with the payment processor before going live on the mainnet | 0.04                                    |
+| WERT_COMMODITY | The token symbol which will be transferred to you by the payment processor (wert.io) when users purchase digital assets through the storefront | POL                                     |
+| WERT_NETWORK | The name of the network on the Polygon blockchain where the payments will be made to (e.g. Polygon Amoy is the testnet) | amoy                                    |
+| WERT_PAYTO_WALLET | Your wallet address on the Poolygon blockchain where the minted Digital Assets will be sent when the user makes a purchase in the storefront | 0x36A3dBc381...17A22BE7F3               |
+| EVM_SC_ADDRESS | The EVM smart contract address on the Polygon blockchain into which the payment processor will make the payment | 0xDB6Ca39D1...9F8985Ae81311fc           |
+| ASSET_POL_PRICE | The price of the Digital Asset being sold on the storefront. The price needs to be given in POL tokens | 2.5                                     |
 
 ### 2.2 - Backend Services
 There are 4 main backend services
