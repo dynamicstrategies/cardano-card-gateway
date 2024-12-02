@@ -118,7 +118,7 @@ digital assets should be sent
 <img src="nextjs/public/images/wallet_connector.png" alt="Payment Example" height="200">
 
 
-#### 2.1.x - Environment Variables
+#### 2.1.2 - Environment Variables
 The environment variable controls the execution of the component and needs to be adjusted for every implementation
 The list of environment variables and their purpose is described in this table
 
