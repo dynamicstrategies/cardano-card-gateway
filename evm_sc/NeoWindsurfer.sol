@@ -23,5 +23,4 @@ contract NeoWindsurfer is ERC20, Ownable {
         address payable to = payable(msg.sender);
         to.transfer(getBalance());
     }
-
 }

@@ -267,6 +267,80 @@ This should only be used for testing
 
 ### 2.3 - EVM Smart Contract
 
+The payment processor (wert.io) pays into an EVM smart contract. This smart contract represents your
+digital asset on the EVM chain.
+
+#### 2.4 - Contract Template
+Below is a template for this smart contract whihc is based on the ERC20 token standard.
+
+- It mirrors the PolicyID and the Asset Name on the Cardano Blockchain
+- It is owned by the creator of the smart contract
+- It mints 1 unit of the asset when the `mint()` function is called
+- It has a function `getBalance` to return the balance in the smart contract
+- Only the Owner of the smart contract can withdraw the Balance from the smart contract
+
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract NeoWindsurfer is ERC20, Ownable {
+    constructor() ERC20("NeoWindsurfer", "NFT") Ownable(msg.sender) {}
+
+    string public policyIdHex = "8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d";
+    string public assetName = "NeoWindsurfer";
+
+
+    function mint(address to) public payable {
+        _mint(to, 1 * 10 ** 18);
+    }
+
+    function getBalance() public view returns(uint) {
+        return address(this).balance;
+    }
+
+    function withdrawMoney() public onlyOwner {
+        address payable to = payable(msg.sender);
+        to.transfer(getBalance());
+    }
+}
+```
+
+When deploying the smart contract, make sure to replace the name of the digital
+asset in the `constructor () ERC20 (...)` function and the `policyIdHex` and `assetName` strings
+to reflect the asset being sold on the Cardano blockchain
+
+#### 2.4.2 - MetaMask
+
+You will need to install a web wallet to deploy the smart contract on an EVM chain.
+Get the Metamask Browser Extension.
+Create a wallet and connect to the Polygon Amoy network. You can use this website to do this
+
+```shell
+https://chainlist.org/chain/80002
+```
+You will need to get some test "POL" token from this faucet `https://faucet.polygon.technology/`
+
+#### 2.4.3 - Remix
+
+The smart contract needs to be deployed on the EVM blockchain. For this, Remix can be useful.
+Remix is a web-based integrated development environment (IDE) specifically designed for writing, 
+deploying, and testing smart contracts on the Ethereum blockchain. It provides developers 
+with a comprehensive set of tools to work with Solidity programming language and deploying their smart contracts
+
+```
+https://remix.ethereum.org/
+```
+
+Even though "ethereum" is in the url, this tool can be used to deployed to other Ethereum Virtual Machine (EVM)
+based blockchains
+
+
+
+
 ...
 
 ### 2.4 - Payment Processor
@@ -455,18 +529,6 @@ sudo docker logs --follow --tail 500 <<container_id>>
 <!-- USAGE EXAMPLES -->
 ## 4 - Usage
 
-Get the Metamask Browser Extension
-Create a wallet and connect to the Polygon Amoy network. You can use this website to do this
-```shell
-https://chainlist.org/chain/80002
-```
-
-Get test "POL" token from this faucet `https://faucet.polygon.technology/`
-You will need to connect with your Discord server to request the test tokens on the website
-
-
-## Deploy EVM Smart Contract
-Access Remix `https://remix.ethereum.org/`
 
 
 ## Testing
