@@ -339,9 +339,78 @@ Even though "ethereum" is in the url, this tool can be used to deployed to other
 based blockchains
 
 
+##### 2.4.3.1 - Create Smart Contract in Remix
+
+Once you access Remix for the first you time, you will be presented with a default_workspace.
+In that workspace create a new file in the `constracts` sub-directoryand give it a name 
+ending with ".sol", for example `NeoWindsurfer.sol`. Then copy the template smart contract provided
+in the above steps into this newly created file.
+
+You might get a warning advising that you need to understand what you are copy/pasting. Check that
+the pasted code is as in the template and take some time to check what the code is meant to do.
+
+<img src="nextjs/public/images/remix_1.png" alt="create smart contract" width="650">
+
+#### 2.4.3.2 - Compile the Smart Contract
+
+Next step is to compile the smart contract. Go to the compile menu on the left-hand side and
+click on the `Compile <<Your Smart Contract Name>>.sol`. The compilation should only take a second
+
+<img src="nextjs/public/images/remix_2.png" alt="create smart contract" width="650">
+
+After the code is compiled it is ready to be deployed to the blockchain so you and other
+can interact with it. Note!: After compiling, you will be able to copy the `ABI` of the smart
+contract, which you will need to past in the Payment Processor (Wert.io) dashboard.
+
+#### 2.4.3.3 - Connect to MetaMask
+
+Next, in the `Deploy & run transactions` menu select `Injected Provider - MetaMask` for the deployment of the smart contract. This
+means that you will use your MetaMask wallet to deploy the contract. This is important as
+the contract has a condition that only the owner can withdraw funds from the smart contract,
+and so the owner needs to be the MetaMask account
+
+<img src="nextjs/public/images/remix_3.png" alt="create smart contract" width="650">
+
+It will ask you to unlock your MetaMask and sign the deployment transaction.
 
 
-...
+#### 2.4.3.3 - Deploy the Smart Contract
+
+Select which account to use to deploy from and press `Deploy`
+
+<img src="nextjs/public/images/remix_4.png" alt="create smart contract" width="650">
+
+Note! If you get a failed transaction, this is likely to an incorrect amount gas being used.
+In this case try changing the `GAS LIMIT` from Custom to Estimated Gas and deploy again.
+
+<img src="nextjs/public/images/remix_5.png" alt="create smart contract" width="650">
+
+
+#### 2.4.3.4 - Smart Contract Address
+
+After the smart contract has been deployed you should see the address at which it has
+been registered on the blockchain. From now on you can find it on blockchain explorer
+and check transactions that are interacting with it.
+
+<img src="nextjs/public/images/remix_6.png" alt="create smart contract" width="650">
+
+#### 2.4.3.5 - Interacting with the Smart Contract
+
+Once deployed on the blockchain you can interact with the smart contract. You can for example
+check the `assetName` of the smart contract. And once money has been sent to this smart contract
+by the Payment Processor (wert.io), you will be able to check the balance with `getBalance` and
+retrieve it into your wallet with the button `withdrawMoney`
+
+<img src="nextjs/public/images/remix_7.png" alt="create smart contract" width="650">
+
+Note! You will only be able to retrieve the balance using the same wallet that create
+the smart contract, this is codified in the smart contract in the line `address payable to = payable(msg.sender);`
+
+
+
+
+
+
 
 ### 2.4 - Payment Processor
 

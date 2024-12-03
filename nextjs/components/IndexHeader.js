@@ -41,8 +41,7 @@ const IndexHeader = observer(class IndexHeader extends React.Component {
                     <div className="flex lg:flex-1">
                         <Link href="#" className="-m-1.5 p-1.5">
                             <span className="sr-only">Logo</span>
-
-                            Logo
+                            <Image src="/images/author_logo.jpeg" alt="logo" width="70" height="70"/>
                         </Link>
                     </div>
                     <div className="flex">
