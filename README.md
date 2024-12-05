@@ -494,8 +494,35 @@ Supporting documentation, besides what is included in this repo, is available at
 
 #### 2.4.1 - Setting-up crypto keys
 
+You need a pair of keys, one public key and one private key. The public key is stored in the wert.io
+dashboard and the private key is used to sign payment requests in one of the backend services.
+This is required so that wert.io can validate that the payment request is coming from you.
+
+<u>For the Sandbox account</u>, these will be sent to you by email when a sales representative sets-up
+an account for you
+
+<u>For the Live account</u>, you will need to follow the steps described in 
+<a href="https://docs.wert.io/docs/generating-a-keypair">this document</a> to
+generate these keys
+
+The following recipe is suggested in the wert.io docs to generate these keys using javascript
+
+```javascript
+import * as ed from '@noble/ed25519'; // ESM-only. Use bundler for common.js
+
+(async () => {
+  const privateKey = ed.utils.randomPrivateKey(); // 32-byte Uint8Array or string
+  const publicKey = await ed.getPublicKeyAsync(privateKey);
+
+  console.log(`Private key: 0x${Buffer.from(privateKey).toString('hex')}`);
+  console.log(`Public key: 0x${Buffer.from(publicKey).toString('hex')}`);
+})();
+```
+
+This is implemented this code as an example page `/ed25519` in this repo
 
 #### 2.4.2 - Configure the keys in the front end and back end
+
 
 
 #### 2.4.3 - Register the Smart Contract OBI
