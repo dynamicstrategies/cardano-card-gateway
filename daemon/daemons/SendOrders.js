@@ -299,7 +299,7 @@ const checkTxHashOnBlockchain = async (txHash) => {
 }
 
 
-const checkEVMPaymentCompletion = async (evmTxHash, evmContractAddress, priceInPol) => {
+const checkEVMPaymentCompletion = async (evmTxHash, evmContractAddress, evmAssetPrice) => {
 
     try {
         const evmTx = await evmProvider.getTransaction(evmTxHash);
@@ -310,7 +310,7 @@ const checkEVMPaymentCompletion = async (evmTxHash, evmContractAddress, priceInP
          * was expected
          */
         if (
-            evmTx.value >= priceInPol * 1e18 &&
+            evmTx.value >= evmAssetPrice * 1e18 &&
             evmTx.to &&
             evmContractAddress.toLowerCase() === evmTx.to.toLowerCase()
         ) {
@@ -391,7 +391,7 @@ const checkForPaymentReceived = async () => {
 
         if (payMethod === "wert") {
 
-            isPaymentSuccess = await checkEVMPaymentCompletion(txHash, doc?.evmContractAddress, doc?.priceInPol)
+            isPaymentSuccess = await checkEVMPaymentCompletion(txHash, doc?.evmContractAddress, doc?.evmAssetPrice)
 
         }
 
@@ -656,7 +656,7 @@ setInterval(async() => {
         await checkForDeliveredOrders()
 
     } catch (err) {
-        if (err.response.status === 403) {
+        if (err.response?.status === 403) {
             console.log(`# - error submitting Tx, wallet still processing previous Tx, wait ...`)
         } else {
             console.log(err)

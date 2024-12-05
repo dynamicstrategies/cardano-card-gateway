@@ -19,8 +19,10 @@ import OrderSchema from "./models/OrderSchema";
 
 const MONGODB_URL = process.env.MONGODB_URL;
 const MONGODB_DB = process.env.MONGODB_DB;
-const ASSET_POL_PRICE = process.env.ASSET_POL_PRICE;
+const ASSET_PRICE = process.env.ASSET_PRICE;
 const EVM_SC_ADDRESS = process.env.EVM_SC_ADDRESS;
+const WERT_COMMODITY = process.env.WERT_COMMODITY
+const WERT_NETWORK = process.env.WERT_NETWORK
 
 const DB_URL = `${MONGODB_URL}/${MONGODB_DB}`;
 
@@ -70,8 +72,10 @@ const handle = async (req, res) => {
 
             const timestamp = Date.now();
 
-            const priceInPol = ASSET_POL_PRICE;
+            const evmAssetPrice = ASSET_PRICE;
             const evmContractAddress = EVM_SC_ADDRESS;
+            const wertNetwork = WERT_NETWORK;
+            const wertCommodity = WERT_COMMODITY;
 
             const orderDict = {
                 policyId,
@@ -84,7 +88,9 @@ const handle = async (req, res) => {
                 createdDateTime: timestamp,
                 timestamp,
                 evmContractAddress,
-                priceInPol,
+                evmAssetPrice,
+                wertNetwork,
+                wertCommodity,
             }
 
 

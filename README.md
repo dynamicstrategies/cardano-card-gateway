@@ -39,7 +39,7 @@ Major frameworks/libraries used in this project.
 [![Next][Next.js]][Next-url] [![ReactJS][ReactJS]][ReactJS-url] [![Axios][Axios]][Axios-url] [![MobX][MobX]][MobX-url]
 [![Tailwindcss][Tailwindcss]][Tailwindcss-url] [![Node][Node.js]][Node-url] [![PM2][PM2]][PM2-url]
 [![MongoDB][MongoDB]][MongoDB-url] [![Mongoose][Mongoose]][Mongoose-url] [![Ethers][Ethers]][Ethers-url]
-[![Polygon][Polygon]][Polygon-url] [![Cardano][Cardano]][Cardano-url]
+[![Polygon][Polygon]][Polygon-url] [![Ethereum][Ethereum]][Ethereum-url] [![Cardano][Cardano]][Cardano-url]
 * Dynamic Strategies
 * Wert.io
 * MeshJS
@@ -47,14 +47,18 @@ Major frameworks/libraries used in this project.
 <!-- ABOUT THE PROJECT -->
 ## 1 - About The Project
 
-This is a cross chain collaboration between Cardano and the Polygon blockchains.
+This is a cross chain collaboration between Cardano and EVM blockchains with a fiat onramp
+
 The codebase includes components for:
 - Accepting card payments for Digital Assets using an EVM payment processor
-- Receiving the payment into a Smart Contract on a Polygon network
+- Receiving the payment into a Smart Contract on a Polygon or Arbitrum network
 - Sending Digital Assets to the buyer on the Cardano network
 
 If you want to contribute this repo then make yourself known with a pull request, or a
 suggested enhancement via the issue tracker
+
+We have so far tested this to receive payment into Polygon and Arbitrum smart contracts and
+send Assets on the Cardano blockchain
 
 ### Demo
 Demo of a sample shopfront with a "Pay with Card" button is available here:
@@ -81,10 +85,13 @@ shown in the next step
 
 The credit card payments are handle by <a href="https://wert.io/">wert.io</a> and the code base in
 this repo implements the connection between this example shopfront and their payment
-processing services. The payment processor processes payments for Digital Assets on the Polygon blockchain
+processing services. The payment processor processes payments for Digital Assets on an EVM blockchain
 therefore additional functionality is implemented in this code base that monitors for
-payments on the Polygon EVM chain and once the payment has been received then sends to the user
+payments on an EVM chain (Polygon or Arbitrum) and once the payment has been received then sends to the user
 the asset on the Cardano blockchain
+
+We tested the Polygon and Arbitrum blockchains and the two can be used interchangeably with a
+handful environment variables to switch from one to another
 
 Below are the printscreens of the workflow when a user clicks on the "Pay with Card" button
 on the storefront and covers the steps from the initial payment to  the final receipt sent to 
@@ -131,20 +138,20 @@ their wallet address where the purchased digital assets should be sent
 The environment variable control the execution of the component and needs to be adjusted for every implementation
 The list of environment variables and their purpose is described in this table
 
-| **Environment Variable** | **Description**                                                                                                                                                                                                                              | **Example**                             |
-|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name                     | mongodb://localhost:27048               |
-| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist                                                                                                               | cgateway                                |
-| ASSET_POLICY_ID | PolicyID of the Asset name on the Cardano blockchain that is being sold on the  storefront. This asset will be delivered to the user                                                                                                         | 8b6e0...289e1c8d                        |
-| ASSET_NAME | Asset Name on the Cardano blockchain from the policy Id above that is being sold on the  storefront. This asset will be delivered to the user                                                                                                | NeoWindsurfer                           |
-| ASSET_IMG_SRC | Image of the Asset to display during the check-out in the payment processor's screen                                                                                                                                                         | https://res.cloudinary.com/...6ucka.png |
-| WERT_WEBHOOK_API | The path to the API services, most of the time can be left unchanged                                                                                                                                                                         | http://localhost:3000/api               |
+| **Environment Variable** | **Description**                                                                                                                                                                                                                                                                  | **Example**                             |
+|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name                                                         | mongodb://localhost:27048               |
+| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist                                                                                                                                                   | cgateway                                |
+| ASSET_POLICY_ID | PolicyID of the Asset name on the Cardano blockchain that is being sold on the  storefront. This asset will be delivered to the user                                                                                                                                             | 8b6e0...289e1c8d                        |
+| ASSET_NAME | Asset Name on the Cardano blockchain from the policy Id above that is being sold on the  storefront. This asset will be delivered to the user                                                                                                                                    | NeoWindsurfer                           |
+| ASSET_IMG_SRC | Image of the Asset to display during the check-out in the payment processor's screen                                                                                                                                                                                             | https://res.cloudinary.com/...6ucka.png |
+| WERT_WEBHOOK_API | The path to the API services, most of the time can be left unchanged                                                                                                                                                                                                             | http://localhost:3000/api               |
 | WERT_FEE_PERC | The amount that is paid to the payment processor as a fee. This will be determined in the contract that will need to be signed with the payment processor before going live on the mainnet. The fee structure is discussed in wert.io FAQs: https://docs.wert.io/docs/general-faq | 0.04                                    |
-| WERT_COMMODITY | The token symbol which will be transferred to you by the payment processor (wert.io) when users purchase digital assets through the storefront                                                                                               | POL                                     |
-| WERT_NETWORK | The name of the network on the Polygon blockchain where the payments will be made to (e.g. Polygon Amoy is the testnet)                                                                                                                      | amoy                                    |
-| WERT_PAYTO_WALLET | Your wallet address on the Poolygon blockchain where the minted Digital Assets will be sent when the user makes a purchase in the storefront                                                                                                 | 0x36A3dBc381...17A22BE7F3               |
-| EVM_SC_ADDRESS | The EVM smart contract address on the Polygon blockchain into which the payment processor will make the payment                                                                                                                              | 0xDB6Ca39D1...9F8985Ae81311fc           |
-| ASSET_POL_PRICE | The price of the Digital Asset being sold on the storefront. The price needs to be given in POL tokens                                                                                                                                       | 2.5                                     |
+| WERT_COMMODITY | The token symbol which will be transferred to you by the payment processor (wert.io) when users purchase digital assets through the storefront                                                                                                                                   | POL                                     |
+| WERT_NETWORK | The name of the network on the Polygon or Arbitrum blockchain where the payments will be made to (e.g. Amoy on Polygon, or Sepolia on Arbitrum are the testnets)                                                                                                                 | amoy                                    |
+| WERT_PAYTO_WALLET | Your wallet address on the Poolygon blockchain where the minted Digital Assets will be sent when the user makes a purchase in the storefront                                                                                                                                     | 0x36A3dBc381...17A22BE7F3               |
+| EVM_SC_ADDRESS | The EVM smart contract address on the Polygon or Arbitrum blockchain into which the payment processor will make the payment                                                                                                                                                      | 0xDB6Ca39D1...9F8985Ae81311fc           |
+| ASSET_POL_PRICE | The price of the Digital Asset being sold on the storefront. The price needs to be given in POL tokens                                                                                                                                                                           | 2.5                                     |
 
 ### 2.2 - Backend Services
 
@@ -221,7 +228,7 @@ on the Cardano Network to the user. It is organized in 5 steps:
 
 1 - Initialize connections to the MongoDB, connect to a Cardano blockchain
 indexed (e.g. Koios https://koios.rest/), set-up a wallet from where to
-send transactions and connect to the Polygoin EVM blockchain to monitor that payment
+send transactions and connect to the Polygoin or Arbitrum EVM blockchain to monitor that payment
 are delivered into the smart contract
 
 2 - Check that payment has been received for the Digital Asset. This is done by
@@ -232,7 +239,7 @@ querying the EVM transaction to confirm that it was done with the right smart co
 and for the right amount
 
 3 - Once the payment has been confirmed by the payment processor
-and independently checked on the Polygon EVM blockchain by the daemon, the next step
+and independently checked on the Polygon or Arbitrum EVM blockchain by the daemon, the next step
 is to build the transaction and send it to the user's Cardano wallet
 
 4 - Continuously check for order delivery to the user's wallet address by checking
@@ -262,14 +269,14 @@ These enviroment variables are defined in the `/daemon/.env` file when runnig in
 and in the `docker-compose.yml` when deployed in a docker container on the server.
 Take care to update these when deploying
 
-| **Environment Variable** | **Description**                                                                                                                                                                                                          | **Example**                       |
-|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
-| NETWORK | The Cardano network on which the platform is being run, there are two testnets: "preview" and "preprod", and the then the "mainnet"                                                                                      | preview                           |
-| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name | mongodb://localhost:27048         |
-| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist                                                                                           | cgateway                          |
-| HOT_WALLET_ADDRESS | The Cardano Hot wallet address where the assets held for distribiution to the users. A back end service monitors for payment receipts and then sends the assets from this wallet                                         | addr_test1qpuq...wr3q0u93y9       |
-| HOT_WALLET_PRVKEY | The Private key for the hot wallet. Make sure to keep this key safe as who ever has access to this key, has access to the contents of the wallet                                                                         | xprv...vcfz              |
-| EVM_RPC | Address to the Indexer of the EVM blockchain. You can find a list of available indexers for different blockchains here https://chainlist.org/chain/80002                                                                                                  | https://rpc.ankr.com/polygon_amoy |
+| **Environment Variable** | **Description**                                                                                                                                                                                                          | **Example**                              |
+|---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------|
+| NETWORK | The Cardano network on which the platform is being run, there are two testnets: "preview" and "preprod", and the then the "mainnet"                                                                                      | preview                                  |
+| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name | mongodb://localhost:27048                |
+| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist                                                                                           | cgateway                                 |
+| HOT_WALLET_ADDRESS | The Cardano Hot wallet address where the assets held for distribiution to the users. A back end service monitors for payment receipts and then sends the assets from this wallet                                         | addr_test1qpuq...wr3q0u93y9              |
+| HOT_WALLET_PRVKEY | The Private key for the hot wallet. Make sure to keep this key safe as who ever has access to this key, has access to the contents of the wallet                                                                         | xprv...vcfz                              |
+| EVM_RPC | Address to the Indexer of the EVM blockchain. You can find a list of available indexers for different blockchains here https://chainlist.org/chain/80002                                                                                                  | https://rpc.ankr.com/polygon_amoy <br/> https://api.zan.top/arb-sepolia |
 
 
 #### 2.2.5 - Bonus: Test Wallet generator
@@ -279,7 +286,7 @@ This should only be used for testing
 
 ### 2.3 - EVM Smart Contract
 
-The payment processor (wert.io) pays into a Polygon EVM smart contract. This smart contract represents your
+The payment processor (wert.io) pays into a EVM smart contract (on Polygon or Arbitrum). This smart contract represents your
 digital asset on the EVM chain.
 
 #### 2.4 - Contract Template
@@ -330,17 +337,36 @@ to reflect the asset being sold on the Cardano blockchain
 
 You will need to install a web wallet to deploy the smart contract on an EVM chain.
 Get the Metamask Browser Extension.
-Create a wallet and connect to the Polygon Amoy network. You can use this website to do this
+Create a wallet and connect to the Polygon Amoy or Arbitrum Sepolia network. You can use this website to do this
+
+
+For Polygon
 
 ```shell
 https://chainlist.org/chain/80002
 ```
+
 You will need to get some test "POL" token from this faucet: 
-<a href="https://faucet.polygon.technology">https://faucet.polygon.technology</a>
+
+<a href="https://faucet.polygon.technology">
+https://faucet.polygon.technology
+</a>
+
+
+For Arbitrum
+
+```shell
+https://chainlist.org/chain/421614
+```
+
+If you are using Arbitrum Sepolia testing then you can use this faucet to get some ETH tokens:
+<a href="https://blastapi.io/faucets/arbitrum-sepolia">
+https://blastapi.io/faucets/arbitrum-sepolia
+</a>
 
 #### 2.4.3 - Remix
 
-The smart contract needs to be deployed on the Polygon EVM blockchain, so the payment processor can pay into it.
+The smart contract needs to be deployed on the EVM blockchain (Polygon or Arbitrum), so the payment processor can pay into it.
 For this, Remix can be used.
 Remix is a web-based integrated development environment (IDE) specifically designed for writing, 
 deploying, and testing smart contracts on the Ethereum blockchain. It provides developers 
@@ -410,7 +436,9 @@ and check transactions that are interacting with it.
 
 <img src="nextjs/public/images/remix_6.png" alt="create smart contract" width="650">
 
-Polygon Amoy blockchain explorer <a href="https://www.oklink.com/amoy">link</a>
+Polygon Amoy blockchain explorer <a href="https://amoy.polygonscan.com">link</a>
+
+Arbitrum Sepolia blockchain explorer <a href="https://sepolia.arbiscan.io/">link</a>
 
 ##### 2.4.3.5 - Interacting with the Smart Contract
 
@@ -471,6 +499,15 @@ Supporting documentation, besides what is included in this repo, is available at
 
 
 #### 2.4.3 - Register the Smart Contract OBI
+
+You need to register the smart contract with the payment processor and provide the
+smart contract's ABI (Application Binary Interface). The ABI is availabe in Remix
+in the Compilation menu after the smart contract has been compiled.
+
+Every time you change the smart contract that you want to receive payments into
+you need to add this smart contract with its ABI to the list in wert.io dashboard
+
+<img src="nextjs/public/images/wert_2.png" alt="create smart contract" width="650">
 
 
 #### 2.4.4 - FAQ on the commercial arrangement
@@ -698,6 +735,8 @@ Distributed under the Apache 2.0 License See `LICENSE.txt` for more information.
 [Cardano-url]: https://cardano.org/
 [Polygon]: https://img.shields.io/badge/polygon-7B3FE4?style=for-the-badge&logo=polygon&logoColor=white
 [Polygon-url]: https://polygon.technology/
+[Ethereum]: https://img.shields.io/badge/ethereum-3C3C3D?style=for-the-badge&logo=ethereum&logoColor=white
+[Ethereum-url]: https://ethereum.org/en/
 [Axios]: https://img.shields.io/badge/axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white
 [Axios-url]: https://axios-http.com/
 [ReactJS]: https://img.shields.io/badge/react-5A29E4?style=for-the-badge&logo=react&logoColor=white

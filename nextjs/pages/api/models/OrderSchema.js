@@ -134,12 +134,30 @@ const OrderSchema = new Schema({
     /**
      * Defines the price in POL tokens on the Polygon
      * blockchain for the Digital Asset that is being sold.
-     * This is required as payment will be made in POL tokens=
+     * This is required as payment will be made in natives tokens
      * into the EVM smart contract
      */
-    priceInPol: {
+    evmAssetPrice: {
         type: Number,
         default: 0,
+        required: true
+    },
+    /**
+     * Which blockchian and network that is used
+     * Example: Polygon Amoy or Arbitrum Sepolina for testing
+     */
+    wertNetwork: {
+        type: String,
+        default: "",
+        required: true
+    },
+    /**
+     * Token on the blockchain that is used for payment
+     * Example: POL on Polygon and ETH on Arbitrum
+     */
+    wertCommodity: {
+        type: String,
+        default: "",
         required: true
     },
     /**
