@@ -49,44 +49,46 @@ Major frameworks/libraries used in this project.
 
 This is a cross chain collaboration between Cardano and the Polygon blockchains.
 The codebase includes components for:
-- Accepting card payments for digital assets using an EVM payment processor
-- Receiving the payment into a smart contract on a Polygon network
+- Accepting card payments for Digital Assets using an EVM payment processor
+- Receiving the payment into a Smart Contract on a Polygon network
 - Sending Digital Assets to the buyer on the Cardano network
 
 If you want to contribute this repo then make yourself known with a pull request, or a
 suggested enhancement via the issue tracker
 
 ### Demo
-Demo of a sample shop-front with a "Pay with Card" button will be shown here 
+Demo of a sample shopfront with a "Pay with Card" button is available here:
 <a href="https://cardgateway.work.gd">cardgateway.work.gd</a>
 
 > [!IMPORTANT]  
-> To test payment lifecycle you will need to registed for a sandbox account with Wert.io and then
-access the page by providing the wertPartnerId and wertPrvKey in the url like this
+> To test payment lifecycle you will need a registeded sandbox account with Wert.io and then
+access the page by providing the `wertPartnerId` and `wertPrvKey` in the url like this
 > 
 > `https://cardgateway.work.gd/front?wertPartnerId=<<your_wert_partner_id>>&wertPrvKey=<<your_wert_private_key>>`
 
 
+
 #### Shopfront
 
-Below is an example printscreen of a shopfront displaying a Digital Asset,
-a Wallet Connector to connect to the user's Cardano Wallet and the Payment processor.
-When a user pressed the "Pay with Card" button this will launch the payment processor
+Below is an example printscreen of a shopfront displaying a Digital Asset (NeoSurfer NFT),
+a Wallet Connector to connect to the user's Cardano Wallet and the "Pay with Card" button.
+When a user presses the "Pay with Card" button this will launch the payment processor as
 shown in the next step
 
 <img src="nextjs/public/images/page_example.png" alt="Page Example" width="350">
 
 #### Payment Processor
 
-The credit card payments are handle by <a href="https://wert.io/">Wert.io</a> and the code based in
-this repo implements the connection between an example website and their payment
-processing services. Additionally, they only provide automation for payments of digital assets
-minted on EVM blockchains, so an additional functionality is implemented that monitors for
-minting of these assets on the EVM chain and sends the user of the asset on the Cardano blockchain
+The credit card payments are handle by <a href="https://wert.io/">wert.io</a> and the code base in
+this repo implements the connection between this example shopfront and their payment
+processing services. The payment processor processes payments for Digital Assets on the Polygon blockchain
+therefore additional functionality is implemented in this code base that monitors for
+payments on the Polygon EVM chain and once the payment has been received then sends to the user
+the asset on the Cardano blockchain
 
-Printscreens of the payment processor screen when a user clicks on the "Pay with Card" button
-on the storefront and then as the user steps through the payment with a final receipt on email
-at the end.
+Below are the printscreens of the workflow when a user clicks on the "Pay with Card" button
+on the storefront and covers the steps from the initial payment to  the final receipt sent to 
+the user's email address
 
 <div style="flex">
     <img src="nextjs/public/images/payment_example_1.png" alt="Payment Example" width="250">
@@ -100,28 +102,33 @@ at the end.
 
 
 ## 2 - Components
-The codebase is made up of 4 components: Frontend, Backend, EVM Smart contract and the Payment processor.
+The codebase is made up of 4 components:
+- Frontend 
+- Backend 
+- EVM Smart contract and 
+- Payment processor
+
 Each one of these is described in the subsections below.
 
 ### 2.1 - Frontend Storefront
-The frontend is built with `NextJS`. It is frontend framework that builds on top of ReactJS and extends by
+The frontend is built with `NextJS` - which is a frontend framework that builds on top of ReactJS and extends by
 adding features such as Server Side Rendering (SSR) and inbuilt API support. It is used by some of the 
-world's largest companies and has extensive documentation. It also has backend functionality which is discussed
-in a separate section on the backend
+world's largest companies and has extensive documentation. Some of its functionality spans between front and backend
+so the backend functionality which is discussed in a separate section on the backend
 
-The codebase for the frontend is stored in the `/nextjs` directory within the main folder. Refer to the section
+The codebase for the frontend is stored in the `/nextjs` directory within the main folder.
 
 #### 2.1.1 - Cardano Wallet Connector
-The frontend includes a Wallet connector to Cardano `Nami` and `Eternl` wallets and to `Koios` blockchain indexer
-to retrieve the current state of transactions. Other Cardano wallets can be added with a few lines of code. The wallet
-connector is used for the user to connect to the storefront and populate their wallet address where the purchased
-digital assets should be sent
+The frontend includes a Wallet connector to Cardano `Nami` and `Eternl` wallets and to the `Koios` blockchain indexer
+The Koios indexer is used to retrieve the current state of transactions. Other Cardano wallets can be added 
+with a few lines of code. The wallet connector is used for the user to connect to the storefront and populate 
+their wallet address where the purchased digital assets should be sent
 
 <img src="nextjs/public/images/wallet_connector.png" alt="Payment Example" height="200">
 
 
 #### 2.1.2 - Environment Variables
-The environment variable controls the execution of the component and needs to be adjusted for every implementation
+The environment variable control the execution of the component and needs to be adjusted for every implementation
 The list of environment variables and their purpose is described in this table
 
 | **Environment Variable** | **Description**                                                                                                                                                                                                                              | **Example**                             |
@@ -142,14 +149,17 @@ The list of environment variables and their purpose is described in this table
 ### 2.2 - Backend Services
 
 #### 2.2.1 - The APIs
-There are three APIs that are part of the NextJS framework. They are used manage the interaction with the payment processor.
+There are three APIs that are part of the NextJS framework.
+They are used to manage the interaction with the payment processor and update the status of payments 
+for the user in the frontend
+
 One of the advantages of using the NextJS framework is that it has an API functionality built in:
 
 - `nextjs/api/wert-payment-intent.js` - the API endpoint accepts POST requests from the frontend, adds
   information on the EVM smart contract where the payment should be
   made and the price of the digital asset in POL tokens and then
   returns back a signature, signed with a Wert Private Key (that
-  is generated during onboarding to Wert.io). For a list inputs and outputs consult the comments
+  is generated during onboarding to wert.io). For a list inputs and outputs consult the comments
 in the file
 
 
@@ -160,13 +170,14 @@ this API endpoint in the processor's web interface to send order
 status updates. The API endpoint accepts POST requests coming in and searches for
 the field "type" to be equal to "order_complete" or "transfer_started".
 The orderId is identified by the "click_id" from the payment processor
-In each of these cases it will update the order status by updating the
-status in the DB. Once the status is updated, it will then be seen by
+In each of these cases it will update the order status in the DB. 
+- Once the status is updated, it will then be seen by
 the backend Daemon service to decide how to proceed with the order.
 
 
 - `nextjs/api/orders.js` - the API point accepts POST request from the frontend and deals
-  with writing new orders to the DB and updating the status of existing orders The list of available methods are:
+  with writing new orders to the DB and updating the status of existing orders. 
+The list of available methods are:
   - "neworder" - create a new order in the database when a user
     presses Pay with Card in the frontend
   - "get_status" - to get the status of the current order. This is
@@ -175,15 +186,15 @@ the backend Daemon service to decide how to proceed with the order.
   - "get_senttxhash" - to get the hash of the transaction on the
     Cardano blockchain that shows the digital asset being sent to the user's
     wallet. This transaction is sent by the backend daemon once it
-    confirms that the payment has been received in the smart contract from Wert.io
+    confirms that the payment has been received in the smart contract from wert.io
 
 
 
 #### 2.2.2 - MongoDB
 The backend database holds information on orders that were initiated through the frontend.
 It should be launched by as docker container alongside the frontend and the daemon service.
-And example is provided in the `docker-compose.yml` in the main directory. This is the
-relevant section in that file that launches the docker container with MongoDB:
+And example is provided in the `docker-compose.yml` in the main directory. Below is the
+relevant section from that file that launches the docker container with MongoDB:
 
 ```yaml
 version: "3.5"
@@ -206,40 +217,40 @@ volumes:
 #### 2.2.3 - Daemon
 
 This Daemon is responsible for monitoring payments and sending assets
-on the Cardano Network. It is organized in 5 steps:
+on the Cardano Network to the user. It is organized in 5 steps:
 
-1 - Initialize connections to the database, connect to a Cardano blockchain
-indexed (e.g. Koios https://koios.rest/), and set-up a wallet from where to
-send transactions. And a connection to the EVM blockchain to monitor that payment
-iss delivered into the smart contract
+1 - Initialize connections to the MongoDB, connect to a Cardano blockchain
+indexed (e.g. Koios https://koios.rest/), set-up a wallet from where to
+send transactions and connect to the Polygoin EVM blockchain to monitor that payment
+are delivered into the smart contract
 
-2 - Check that payment has been received for the assets. This is done by
+2 - Check that payment has been received for the Digital Asset. This is done by
 periodically checking (e.g. every 5 seconds) the status of all orders
-that have been registered in the database. And then for the orders
-where the payment processor has confirmed payment, further check by
-querying the EVM transaction that it was done with the right smart contract
+that have been registered in the MongoDB database. And then, for the orders
+where the payment processor has confirmed payment, do a further check by
+querying the EVM transaction to confirm that it was done with the right smart contract
 and for the right amount
 
 3 - Once the payment has been confirmed by the payment processor
-and independently checked on the EVM blockchain by the daemon, the next step
+and independently checked on the Polygon EVM blockchain by the daemon, the next step
 is to build the transaction and send it to the user's Cardano wallet
 
-4 - Continuously check for order delivery to the user by checking
+4 - Continuously check for order delivery to the user's wallet address by checking
 the state of the transaction on the Cardano blockchain. Once the
-transaction has been confirmed, update the DB. This will then
+transaction has been confirmed, update the status of the order in MongoDB. This will then
 be picked up by the frontend and shown to the user that the transaction
 has been delivered to their wallet
 
-5 - Check for transactions that have been pending for a long time and
-mark those for which payment has not been received in 24 hours as failed
+5 - Check for transactions that have been pending for a long time (e.g. 24 hours) and
+mark those for which payment has not been received as failed.
 After this point the daemon will stop continuously checking for their
 status
 
 memo: the order status has 5 stages:
 - initiated - when the user has requested to Pay with Card for an order
 - transfer_started - when payment processor received the order
-- paid - when user paid for the order and payment processor has paid you
-- sent - when the ticket has been sent to the user into their Cardano wallet
+- paid - when user paid for the order and payment processor has paid into the smart contract
+- sent - when the order has been sent to the user's Cardano wallet
 - delivered - when the order has been delivered to the user's Cardano wallet
 
 The daemon monitors for each of the above stages
@@ -247,8 +258,9 @@ The daemon monitors for each of the above stages
 
 #### 2.2.4 - Environment Variables
 
-These enviroment variable are defined in the `/daemon/.env` file when run in the development environment
-and in the `docker-compose.yml` when deployed in a docker container on the server
+These enviroment variables are defined in the `/daemon/.env` file when runnig in the development environment
+and in the `docker-compose.yml` when deployed in a docker container on the server.
+Take care to update these when deploying
 
 | **Environment Variable** | **Description**                                                                                                                                                                                                          | **Example**                       |
 |---|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------|
@@ -267,11 +279,12 @@ This should only be used for testing
 
 ### 2.3 - EVM Smart Contract
 
-The payment processor (wert.io) pays into an EVM smart contract. This smart contract represents your
+The payment processor (wert.io) pays into a Polygon EVM smart contract. This smart contract represents your
 digital asset on the EVM chain.
 
 #### 2.4 - Contract Template
-Below is a template for this smart contract whihc is based on the ERC20 token standard.
+Below is a template for this smart contract. It is based on the 
+<a href="https://ethereum.org/en/developers/docs/standards/tokens/erc-20/">ERC20 token standard</a>.
 
 - It mirrors the PolicyID and the Asset Name on the Cardano Blockchain
 - It is owned by the creator of the smart contract
@@ -309,8 +322,8 @@ contract NeoWindsurfer is ERC20, Ownable {
 }
 ```
 
-When deploying the smart contract, make sure to replace the name of the digital
-asset in the `constructor () ERC20 (...)` function and the `policyIdHex` and `assetName` strings
+When deploying the smart contract, make sure to replace the name of the Digital
+Asset in the `constructor () ERC20 (...)` function and the `policyIdHex` and `assetName` strings
 to reflect the asset being sold on the Cardano blockchain
 
 #### 2.4.2 - MetaMask
@@ -322,11 +335,13 @@ Create a wallet and connect to the Polygon Amoy network. You can use this websit
 ```shell
 https://chainlist.org/chain/80002
 ```
-You will need to get some test "POL" token from this faucet `https://faucet.polygon.technology/`
+You will need to get some test "POL" token from this faucet: 
+<a href="https://faucet.polygon.technology">https://faucet.polygon.technology</a>
 
 #### 2.4.3 - Remix
 
-The smart contract needs to be deployed on the EVM blockchain. For this, Remix can be useful.
+The smart contract needs to be deployed on the Polygon EVM blockchain, so the payment processor can pay into it.
+For this, Remix can be used.
 Remix is a web-based integrated development environment (IDE) specifically designed for writing, 
 deploying, and testing smart contracts on the Ethereum blockchain. It provides developers 
 with a comprehensive set of tools to work with Solidity programming language and deploying their smart contracts
@@ -342,32 +357,33 @@ based blockchains
 ##### 2.4.3.1 - Create Smart Contract in Remix
 
 Once you access Remix for the first you time, you will be presented with a default_workspace.
-In that workspace create a new file in the `constracts` sub-directoryand give it a name 
-ending with ".sol", for example `NeoWindsurfer.sol`. Then copy the template smart contract provided
-in the above steps into this newly created file.
+In that workspace, create a new file in the `constracts` subdirectory and give it a name 
+ending with ".sol". For example `NeoWindsurfer.sol`. Then copy the template smart contract provided
+in the steps above into this newly created file.
 
 You might get a warning advising that you need to understand what you are copy/pasting. Check that
-the pasted code is as in the template and take some time to check what the code is meant to do.
+the pasted code is as in the template and take some time to understand what the code is meant to do.
 
 <img src="nextjs/public/images/remix_1.png" alt="create smart contract" width="650">
 
 ##### 2.4.3.2 - Compile the Smart Contract
 
 Next step is to compile the smart contract. Go to the compile menu on the left-hand side and
-click on the `Compile <<Your Smart Contract Name>>.sol`. The compilation should only take a second
+click on the `Compile <<Your Smart Contract Name>>.sol`. Compilation should only take a second or two
 
 <img src="nextjs/public/images/remix_2.png" alt="create smart contract" width="650">
 
-After the code is compiled it is ready to be deployed to the blockchain so you and other
+After the code is compiled, it is ready to be deployed to the blockchain, so you and the payment processor
 can interact with it. Note!: After compiling, you will be able to copy the `ABI` of the smart
-contract, which you will need to past in the Payment Processor (Wert.io) dashboard.
+contract. You will need this to paste in the Payment Processor's (wert.io) dashboard in a later step.
 
 ##### 2.4.3.3 - Connect to MetaMask
 
-Next, in the `Deploy & run transactions` menu select `Injected Provider - MetaMask` for the deployment of the smart contract. This
-means that you will use your MetaMask wallet to deploy the contract. This is important as
-the contract has a condition that only the owner can withdraw funds from the smart contract,
-and so the owner needs to be the MetaMask account
+Next, in the `Deploy & run transactions` menu select `Injected Provider - MetaMask` for the deployment 
+of the smart contract. This
+means that you will use your MetaMask wallet to deploy the contract to the blockchain. This is important, as
+the contract has a condition that only its owner can withdraw funds from the smart contract,
+and so the owner needs to be your MetaMask account
 
 <img src="nextjs/public/images/remix_3.png" alt="create smart contract" width="650">
 
@@ -376,45 +392,89 @@ It will ask you to unlock your MetaMask and sign the deployment transaction.
 
 ##### 2.4.3.3 - Deploy the Smart Contract
 
-Select which account to use to deploy from and press `Deploy`
+Select which account to use to deploy from and press `Deploy` as in shon in the printscreen below
 
 <img src="nextjs/public/images/remix_4.png" alt="create smart contract" width="650">
 
-Note! If you get a failed transaction, this is likely to an incorrect amount gas being used.
-In this case try changing the `GAS LIMIT` from Custom to Estimated Gas and deploy again.
+Note! If you get a failed transaction, this is likely due to an incorrect amount of gas being used.
+Try changing the `GAS LIMIT` from Custom to Estimated Gas and deploy again.
 
 <img src="nextjs/public/images/remix_5.png" alt="create smart contract" width="650">
 
 
 ##### 2.4.3.4 - Smart Contract Address
 
-After the smart contract has been deployed you should see the address at which it has
+After the smart contract has been deployed, you should see the address at which it has
 been registered on the blockchain. From now on you can find it on blockchain explorer
 and check transactions that are interacting with it.
 
 <img src="nextjs/public/images/remix_6.png" alt="create smart contract" width="650">
 
+Polygon Amoy blockchain explorer <a href="https://www.oklink.com/amoy">link</a>
+
 ##### 2.4.3.5 - Interacting with the Smart Contract
 
-Once deployed on the blockchain you can interact with the smart contract. You can for example
+Once deployed on the blockchain, you can interact with the smart contract. For example
 check the `assetName` of the smart contract. And once money has been sent to this smart contract
 by the Payment Processor (wert.io), you will be able to check the balance with `getBalance` and
 retrieve it into your wallet with the button `withdrawMoney`
 
 <img src="nextjs/public/images/remix_7.png" alt="create smart contract" width="650">
 
-Note! You will only be able to retrieve the balance using the same wallet that create
+Note! You will only be able to retrieve the balance using the same wallet that created
 the smart contract, this is codified in the smart contract in the line `address payable to = payable(msg.sender);`
 
 
+##### 2.4.3.6 - Withdrawing Balance from Smart Contract
 
+Once the payment has been processed by the payment processor (wert.io) and sent to 
+the smart contract, you then should be able to:
+1. check the current balance in the smart contract by calling `getBalance` in Remix
+2. withdraw the balance to your MetaMask wallet by calling `withdrawMoney` in Remix
 
+<img src="nextjs/public/images/remix_8.png" alt="create smart contract" width="650">
+
+When withdrawing money from the smart contract, a box should pop up the MetaMask and ask
+you to sign the transaction.
+
+<img src="nextjs/public/images/remix_9.png" alt="create smart contract" width="150">
+
+After a few seconds (depending on how busy the blockchain is), you should get a confirmation
+that the transaction has been confirmed on the blockchain and Remix should give you the detail
+of the transaction.
+
+<img src="nextjs/public/images/remix_10.png" alt="create smart contract" width="650">
+
+This completes the circle of receiving payment for digital assets into an EVM smart contract
+and then retrieving it from the smart contract into your wallet
 
 
 
 ### 2.4 - Payment Processor
 
-...
+The first step is to register with the payment processor at <a href="https://wert.io/">https://wert.io</a>
+They have two check-out options
+1. NFT Checkout (covered by this code)
+2. Fiat Onramp (not covered)
+
+Select `NFT Checkout` and then Contact Sales to set-up a Sandbox account to start your intergration
+
+<img src="nextjs/public/images/wert_1.png" alt="create smart contract" width="650">
+
+Supporting documentation, besides what is included in this repo, is available at
+<a href="https://docs.wert.io/docs/introduction">wert.io docs</a>
+
+#### 2.4.1 - Setting-up crypto keys
+
+
+#### 2.4.2 - Configure the keys in the front end and back end
+
+
+#### 2.4.3 - Register the Smart Contract OBI
+
+
+#### 2.4.4 - FAQ on the commercial arrangement
+
 
 
 <!-- GETTING STARTED -->
