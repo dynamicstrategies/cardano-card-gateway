@@ -284,6 +284,23 @@ An additional API was used in testing to generate wallets on the Cardano testnet
 `/api/walletgenerator` endpoint and a demo of its is running at `https://cardgateway.work.gd/api/walletgenerator`
 This should only be used for testing
 
+
+#### 2.2.6 - Bonus: FX Rates
+
+The "FXrates" table in the MongoDB holds the exchange rates between crypto tokens
+and USD. The payment processor handling card payment quotes the client
+the purchase value in USD, while paying the equivalent amount
+of blockchain native currency into the smart contract (that can later
+be withdrawn). The exchange rate between the native currency and
+USD is constantly changing and this table holds the most up-to-date
+exchange rate so the price in USD that is shown to the client is
+similar to what the payment processor will charge
+
+You will need to periodically update the FX Rates in MongoDB to ensure they are in line
+with the market. You can do it in tree different ways:
+1. Connect to MongoDB with a desktop GUI such as MongoDB Compass and update the FX Rates table
+2. 
+
 ### 2.3 - EVM Smart Contract
 
 The payment processor (wert.io) pays into a EVM smart contract (on Polygon or Arbitrum). This smart contract represents your
@@ -718,6 +735,24 @@ And you can monitor the running of each docker container with, replacing <<conta
 ```shell
 sudo docker logs --follow --tail 500 <<container_id>>
 ```
+
+
+### 3.3 - Set-up Firewall
+
+Make sure you restrict access the server ports.
+You can use the `ufw` linux firewall for this.
+
+Restrict access to the MongoDB port `27048` to a specific IP address
+so that only that IP address can access the database and make changes to it
+This might be useful for updating the FX Rates using a MongoDB GUI such as
+MongoDB Compass
+
+Example command to set restrict access to a port:
+```shell
+sudo ufw allow from xxx.xxx.xxx.xxx proto tcp to any port 27048
+```
+Where you need to replace xxx with the IP address from where access is permitted
+
 
 <!-- USAGE EXAMPLES -->
 ## 4 - Usage

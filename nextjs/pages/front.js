@@ -30,6 +30,8 @@ export const getServerSideProps = async (ctx) => {
   const ASSET_NAME = process.env.ASSET_NAME;
   const ASSET_IMG_SRC = process.env.ASSET_IMG_SRC;
   const EVM_SC_ADDRESS = process.env.EVM_SC_ADDRESS;
+  const ASSET_PRICE = process.env.ASSET_PRICE;
+  const WERT_COMMODITY = process.env.WERT_COMMODITY;
 
   return {
     props: {
@@ -40,6 +42,8 @@ export const getServerSideProps = async (ctx) => {
       EVM_SC_ADDRESS,
       wertPrvKey,
       wertPartnerId,
+      ASSET_PRICE,
+      WERT_COMMODITY,
     }
   }
 }
@@ -75,6 +79,8 @@ const Front = observer(class Front extends React.Component {
         orderSent: false,
         orderDelivered: false,
       },
+
+      assetPriceUSD: undefined,
 
       orderSentTxHash: undefined,
 
@@ -307,14 +313,6 @@ const Front = observer(class Front extends React.Component {
       const URL = `${this.props.WERT_WEBHOOK_API}/orders`
       const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
 
-      // const response = await axios({
-      //   method: 'GET',
-      //   url: '/orders',
-      //   baseURL: this.props.WERT_WEBHOOK_API,
-      //   params: req,
-      //   headers: {'Content-Type': 'application/json'},
-      // })
-
       if (response.status === 200) {
 
         const orderSentTxHash = response.data?.orderSentTxHash;
@@ -336,9 +334,47 @@ const Front = observer(class Front extends React.Component {
   }
 
 
+  getAssetPriceUSD = async () => {
+
+    const payload = {
+      purpose: "get_fxrate",
+      baseCcy: String(this.props.WERT_COMMODITY),
+      counterCcy: "USD"
+    }
+
+    const req = JSON.stringify(payload)
+
+    try {
+
+      const URL = `${this.props.WERT_WEBHOOK_API}/fxrates`
+      const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
+
+
+      if (response.status === 200) {
+
+        const {baseCcy, counterCcy, timestamp, rate} = response.data;
+        const assetPriceUSD = this.props.ASSET_PRICE * rate
+        this.setState({assetPriceUSD})
+
+      } else {
+        console.error(response)
+      }
+
+    } catch(err) {
+      console.log(err)
+    }
+
+    return undefined;
+
+  }
+
 
   componentDidMount() {
 
+    /**
+     * Get the asset's latest price in USD to show on the screen
+     */
+    this.getAssetPriceUSD().then(() => {})
 
     /**
      * Sets up a loop to run every 5 seconds (5000 milliseconds) and check for
@@ -456,7 +492,11 @@ const Front = observer(class Front extends React.Component {
                 {/* Options */}
                 <div className="mt-4 lg:row-span-3 lg:mt-0">
                   <h2 className="sr-only">Product information</h2>
-                  <p className="text-3xl tracking-tight text-gray-900">$1.5</p>
+                  <p className="text-3xl tracking-tight text-gray-900">{
+                    this.state.assetPriceUSD
+                    ? `$${Number(this.state.assetPriceUSD).toLocaleString("en-US", {maximumFractionDigits:1})} USD`
+                    : "Price loading ..."
+                  }</p>
 
                   {/* Reviews */}
                   <div className="mt-6">
