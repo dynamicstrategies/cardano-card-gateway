@@ -4,7 +4,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="">
     <img src="nextjs/public/images/cardano_logo.png" alt="Logo" width="320" height="65">
   </a>
 </div>
@@ -325,24 +325,26 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NeoWindsurfer is ERC20, Ownable {
-    constructor() ERC20("NeoWindsurfer", "NFT") Ownable(msg.sender) {}
+  constructor() ERC20("NeoWindsurfer", "NFT") Ownable(msg.sender) {}
 
-    string public policyIdHex = "8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d";
-    string public assetName = "NeoWindsurfer";
+  string public policyIdHex = "8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d";
+  string public assetName = "NeoWindsurfer";
 
+  event Minted(address indexed to, address indexed contractAddress, uint256 valueSent, string indexed identifier);
 
-    function mint(address to) public payable {
-        _mint(to, 1 * 10 ** 18);
-    }
+  function mint(address to) public payable {
+    _mint(to, 1 * 10 ** 18);
+    emit Minted(to, address(this), msg.value, "MintedWertCardano");
+  }
 
-    function getBalance() public view returns(uint) {
-        return address(this).balance;
-    }
+  function getBalance() public view returns(uint) {
+    return address(this).balance;
+  }
 
-    function withdrawMoney() public onlyOwner {
-        address payable to = payable(msg.sender);
-        to.transfer(getBalance());
-    }
+  function withdrawMoney() public onlyOwner {
+    address payable to = payable(msg.sender);
+    to.transfer(getBalance());
+  }
 }
 ```
 
@@ -778,7 +780,6 @@ Distributed under the Apache 2.0 License See `LICENSE.txt` for more information.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [Tailwindcss]: https://img.shields.io/badge/tailwindcss-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white
