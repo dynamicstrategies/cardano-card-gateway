@@ -558,6 +558,37 @@ you need to add this smart contract with its ABI to the list in wert.io dashboar
 
 #### 2.4.4 - FAQ on the commercial arrangement
 
+These are a most commonly asked questions in regards to the agreement with you (the NFT Creator) and Wert.io
+
+> [!IMPORTANT]  
+> These FAQs provide a general sense of what to expect in the agreement. 
+> However, it is your responsibility to read and fully understand the entire agreement, 
+> as it contains important legal and contractual obligations.
+
+**What is the Purpose of the Agreement?** - The agreement outlines the terms and conditions between the Wert.io and NFT Creator regarding processing payments for the NFTs that the Creator sells
+
+**How long is the agreement valid for?** - The agreement is usually valid for 12 months and automatically renews unless terminated by either party.
+
+**Is it an exclusive agreement?** - No, this is a non-exclusive agreement for both parties. This means that you can use other payment processors if you want to.
+
+**Can the company stop paying the fees?** - There is a provision for Sanctions, Money Laundering, Terrorist Financing, or agreement violations, the Company may stop payments
+if it identifies activity  that breaches the agreement. It is important that you understand all the conditions in the
+agreement before signing.
+
+**What are my main Responsibilities?** - Ensuring that the customers buying the NFTs are awareness and consent for data sharing, 
+adhering to legal and regulatory requirements, and not misrepresenting Wert.io.
+
+**What are Wert.io main Responsibilities?** - Ensuring it has the required licenses, avoiding legal liabilities for the NFT Creator, and maintaining confidentiality.
+
+**Can the agreement be terminated?** - Wert.io can terminate the agreement immediately for serious breaches or with 90 days' notice for other reasons. 
+The Affiliate can terminate the agreement with a 90 days' notice.
+
+**What happens to the fees if the agreement is terminated?** - Wert.io will stop paying service fees beyond the termination date.
+
+**Can Wert.io reject transactions?** - Yes, if a transaction is linked to sanctions or illicit activity.
+
+**Who is the Merchant of Record for NFT purchases?** - Wert.io is the Merchant of Record.
+
 
 
 <!-- GETTING STARTED -->
