@@ -1,5 +1,3 @@
-> [!IMPORTANT]  
-> This is a Work in progress
 
 <!-- PROJECT LOGO -->
 <br />
@@ -63,13 +61,6 @@ send Assets on the Cardano blockchain
 ### Demo
 Demo of a sample shopfront with a "Pay with Card" button is available here:
 <a href="https://cardgateway.work.gd">cardgateway.work.gd</a>
-
-> [!IMPORTANT]  
-> To test payment lifecycle you will need a registeded sandbox account with Wert.io and then
-access the page by providing the `wertPartnerId` and `wertPrvKey` in the url like this
-> 
-> `https://cardgateway.work.gd/front?wertPartnerId=<<your_wert_partner_id>>&wertPrvKey=<<your_wert_private_key>>`
-
 
 
 #### Shopfront
