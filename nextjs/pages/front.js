@@ -22,8 +22,10 @@ import axios from "axios";
  */
 export const getServerSideProps = async (ctx) => {
 
-  const wertPrvKey = ctx.query?.wertPrvKey || null;
-  const wertPartnerId = ctx.query?.wertPartnerId || null;
+  // const wertPrvKey = ctx.query?.wertPrvKey || null;
+  // const wertPartnerId = ctx.query?.wertPartnerId || null;
+
+  const wertPartnerId = process.env.WERT_PARTNER_ID || null;
 
   const WERT_WEBHOOK_API = process.env.WERT_WEBHOOK_API;
   const ASSET_POLICY_ID = process.env.ASSET_POLICY_ID
@@ -40,7 +42,6 @@ export const getServerSideProps = async (ctx) => {
       ASSET_NAME,
       ASSET_IMG_SRC,
       EVM_SC_ADDRESS,
-      wertPrvKey,
       wertPartnerId,
       ASSET_PRICE,
       WERT_COMMODITY,
@@ -66,7 +67,6 @@ const Front = observer(class Front extends React.Component {
     // Local State
     this.state = {
       changeAddress: "",
-      wertPrvKey: this.props.wertPrvKey,
       wertPartnerId: this.props.wertPartnerId,
 
       orderId: undefined,
@@ -574,7 +574,7 @@ const Front = observer(class Front extends React.Component {
                           WERT_WEBHOOK_API={this.props.WERT_WEBHOOK_API}
                           handleWertInitiated={this.handleWertInitiated}
                           WERT_PARTNER_ID={this.state.wertPartnerId}
-                          WERT_SECRET_KEY={this.state.wertPrvKey}
+                          // WERT_SECRET_KEY={this.state.wertPrvKey}
                           orderId={this.state.orderId}
                           ticketAssetName={this.props.ASSET_NAME}
                           ticketImgSrc={this.props.ASSET_IMG_SRC || ""}

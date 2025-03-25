@@ -21,6 +21,8 @@
 
 import { signSmartContractData } from '@wert-io/widget-sc-signer';
 
+
+const WERT_PRV_KEY = process.env.WERT_PRV_KEY
 const WERT_COMMODITY = process.env.WERT_COMMODITY;
 const WERT_NETWORK = process.env.WERT_NETWORK;
 const WERT_PAYTO_WALLET = process.env.WERT_PAYTO_WALLET;
@@ -35,7 +37,7 @@ const handle = async (req, res) => {
         let result;
         let statusCode;
 
-        const {orderId, WERT_SECRET_KEY} = req.body;
+        const {orderId} = req.body;
 
         const assetPrice = Number(ASSET_PRICE);
         const evmSmartContractAddr = EVM_SC_ADDRESS;
@@ -55,7 +57,7 @@ const handle = async (req, res) => {
                 network: WERT_NETWORK,
                 sc_address: evmSmartContractAddr,
                 sc_input_data: evmSmartContractCallData,
-            }, WERT_SECRET_KEY);
+            }, WERT_PRV_KEY);
 
             result = {signedData, assetPrice};
             statusCode = 200;

@@ -62,7 +62,7 @@ class PayWithWert extends React.Component {
 
         let payload = {
             orderId,
-            WERT_SECRET_KEY: this.props.WERT_SECRET_KEY,
+            // WERT_SECRET_KEY: this.props.WERT_SECRET_KEY,
         };
 
         const req = JSON.stringify(payload);

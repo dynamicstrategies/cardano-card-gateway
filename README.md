@@ -138,20 +138,22 @@ their wallet address where the purchased digital assets should be sent
 The environment variable control the execution of the component and needs to be adjusted for every implementation
 The list of environment variables and their purpose is described in this table
 
-| **Environment Variable** | **Description**                                                                                                                                                                                                                                                                  | **Example**                             |
-|---|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
-| MONGODB_URL | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name                                                         | mongodb://localhost:27048               |
-| MONGODB_DB | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist                                                                                                                                                   | cgateway                                |
-| ASSET_POLICY_ID | PolicyID of the Asset name on the Cardano blockchain that is being sold on the  storefront. This asset will be delivered to the user                                                                                                                                             | 8b6e0...289e1c8d                        |
-| ASSET_NAME | Asset Name on the Cardano blockchain from the policy Id above that is being sold on the  storefront. This asset will be delivered to the user                                                                                                                                    | NeoWindsurfer                           |
-| ASSET_IMG_SRC | Image of the Asset to display during the check-out in the payment processor's screen                                                                                                                                                                                             | https://res.cloudinary.com/...6ucka.png |
-| WERT_WEBHOOK_API | The path to the API services, most of the time can be left unchanged                                                                                                                                                                                                             | http://localhost:3000/api               |
-| WERT_FEE_PERC | The amount that is paid to the payment processor as a fee. This will be determined in the contract that will need to be signed with the payment processor before going live on the mainnet. The fee structure is discussed in wert.io FAQs: https://docs.wert.io/docs/general-faq | 0.04                                    |
-| WERT_COMMODITY | The token symbol which will be transferred to you by the payment processor (wert.io) when users purchase digital assets through the storefront                                                                                                                                   | POL                                     |
-| WERT_NETWORK | The name of the network on the Polygon or Arbitrum blockchain where the payments will be made to (e.g. Amoy on Polygon, or Sepolia on Arbitrum are the testnets)                                                                                                                 | amoy                                    |
-| WERT_PAYTO_WALLET | Your wallet address on the Poolygon blockchain where the minted Digital Assets will be sent when the user makes a purchase in the storefront                                                                                                                                     | 0x36A3dBc381...17A22BE7F3               |
-| EVM_SC_ADDRESS | The EVM smart contract address on the Polygon or Arbitrum blockchain into which the payment processor will make the payment                                                                                                                                                      | 0xDB6Ca39D1...9F8985Ae81311fc           |
-| ASSET_PRICE | The price of the Digital Asset being sold on the storefront. The price needs to be given in POL tokens                                                                                                                                                                           | 2.5                                     |
+| **Environment Variable** | **Description**                                                                                                                                                                                                                                                                                                                    | **Example**                             |
+|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| MONGODB_URL              | The path to a MongpDB instance running on your machine, or an another server. This can also be running in a separate docker container in which case you will need to adjust the localhost to point to the container name                                                                                                           | mongodb://localhost:27048               |
+| MONGODB_DB               | The database name that will be used in MongoDB. This database will be created during the first transaction if it doesn't exist                                                                                                                                                                                                     | cgateway                                |
+| ASSET_POLICY_ID          | PolicyID of the Asset name on the Cardano blockchain that is being sold on the  storefront. This asset will be delivered to the user                                                                                                                                                                                               | 8b6e0...289e1c8d                        |
+| ASSET_NAME               | Asset Name on the Cardano blockchain from the policy Id above that is being sold on the  storefront. This asset will be delivered to the user                                                                                                                                                                                      | NeoWindsurfer                           |
+| ASSET_IMG_SRC            | Image of the Asset to display during the check-out in the payment processor's screen                                                                                                                                                                                                                                               | https://res.cloudinary.com/...6ucka.png |
+| WERT_WEBHOOK_API         | The path to the API services, most of the time can be left unchanged                                                                                                                                                                                                                                                               | http://localhost:3000/api               |
+| WERT_FEE_PERC            | The amount that is paid to the payment processor as a fee. This will be determined in the contract that will need to be signed with the payment processor before going live on the mainnet. The fee structure is discussed in wert.io FAQs: https://docs.wert.io/docs/general-faq                                                  | 0.04                                    |
+| WERT_COMMODITY           | The token symbol which will be transferred to you by the payment processor (wert.io) when users purchase digital assets through the storefront                                                                                                                                                                                     | POL or ETH                              |
+| WERT_NETWORK             | The name of the network on the Polygon or Arbitrum blockchain where the payments will be made to (e.g. Amoy on Polygon, or Sepolia on Arbitrum are the testnets)                                                                                                                                                                   | amoy or arbitrum_sepolia                                |
+| WERT_PAYTO_WALLET        | Your wallet address on the Poolygon blockchain where the minted Digital Assets will be sent when the user makes a purchase in the storefront                                                                                                                                                                                       | 0x36A3dBc381...17A22BE7F3               |
+| EVM_SC_ADDRESS           | The EVM smart contract address on the Polygon or Arbitrum blockchain into which the payment processor will make the payment                                                                                                                                                                                                        | 0xDB6Ca39D1...9F8985Ae81311fc           |
+| ASSET_PRICE              | The price of the Digital Asset being sold on the storefront. The price needs to be given in POL tokens                                                                                                                                                                                                                             | 2.5                                     |
+| WERT_PARTNER_ID          | ID issued by Wert.io that uniquely indetifies your account on their system. You will be given this ID by the their sales team                                                                                                                                                                                                      | 01G...6SN                               |
+| WERT_PRV_KEY          | The private key that is used to sign payment requests. When payment requests are signed by this key, it lets Wert know that the payment request is genuine. For the Sanbox account this key will be given by the Wert Sales team. A separate section in this doc explains how this key is generated for when going into production | 0x57...1d3                              |
 
 ### 2.2 - Backend Services
 
@@ -299,7 +301,11 @@ similar to what the payment processor will charge
 You will need to periodically update the FX Rates in MongoDB to ensure they are in line
 with the market. You can do it in tree different ways:
 1. Connect to MongoDB with a desktop GUI such as MongoDB Compass and update the FX Rates table
-2. 
+2. Open the "cgateway" db and insert / update a record with exchange rate
+
+Example:
+
+<img src="nextjs/public/images/mongodb_1.png" alt="Mongo DB Exchange rates Example" height="400">
 
 ### 2.3 - EVM Smart Contract
 
@@ -511,11 +517,16 @@ Select `NFT Checkout` and then Contact Sales to set-up a Sandbox account to star
 Supporting documentation, besides what is included in this repo, is available at
 <a href="https://docs.wert.io/docs/introduction">wert.io docs</a>
 
+Sandbox access
+
+
 #### 2.4.1 - Setting-up crypto keys
 
 You need a pair of keys, one public key and one private key. The public key is stored in the wert.io
 dashboard and the private key is used to sign payment requests in one of the backend services.
-This is required so that wert.io can validate that the payment request is coming from you.
+
+The private key is used to sign data, ensuring the authenticity and integrity of requests sent from your application to Wert's platform.
+This digital signature verifies that the requests originate from a trusted source—you—and have not been altered during transmission.
 
 <u>For the Sandbox account</u>, these will be sent to you by email when a sales representative sets-up
 an account for you
@@ -540,9 +551,38 @@ import * as ed from '@noble/ed25519'; // ESM-only. Use bundler for common.js
 
 This is implemented this code as an example page `/ed25519` in this repo
 
+> [!IMPORTANT]  
+> To keep your private key safe, you should construct the signature on your backend and pass it to the frontend when initializing the widget.
+> Please note: This is NOT a wallet private key, it is just a digital signature to encrypt the request.
+
+
 #### 2.4.2 - Configure the keys in the front end and back end
 
+The front end shows the Wert widget with the payment request, and this is where the user enteres their details.
 
+Prior to showing the widget to the end user it needs to talk  the backend to "sign" the request. This signing uses the
+private key, so it lets Wert know that this request is coming from a genuine source.
+
+The private key is stored in an environment variable `WERT_PRV_KEY` . Make sure to update it when using the Sandbox and when going live
+
+The private key is used to sign transaction in the file `./api/wert-payment-intent` which is an API endpoint and is called from the front end. 
+This is the section of the code in the file where the private key is used:
+
+```javascript
+const signedData = signSmartContractData({
+  address: WERT_PAYTO_WALLET,
+  commodity: WERT_COMMODITY,
+  commodity_amount: assetPrice,
+  network: WERT_NETWORK,
+  sc_address: evmSmartContractAddr,
+  sc_input_data: evmSmartContractCallData,
+}, WERT_PRV_KEY);
+```
+
+Note: The Partner ID should also be updated and is stored in the environment variable `WERT_PARTNER_ID`
+
+> [!IMPORTANT]  
+> The Wert Private Key and Partner ID are stored in environment variables `WERT_PRV_KEY` and `WERT_PARTNER_ID`
 
 #### 2.4.3 - Register the Smart Contract OBI
 
@@ -550,8 +590,14 @@ You need to register the smart contract with the payment processor and provide t
 smart contract's ABI (Application Binary Interface). The ABI is availabe in Remix
 in the Compilation menu after the smart contract has been compiled.
 
-Every time you change the smart contract that you want to receive payments into
-you need to add this smart contract with its ABI to the list in wert.io dashboard
+You can do so by following these steps:
+
+- Login to your Partner Dashboard and locate the `Settings -> Smart Contracts option`.
+- Click the `Add New Smart Contract` button to open the interaction.
+- Add your smart contract address to the `SC address` field and the ABI of the implementation contract to the `Contract ABI` field.
+- Click `Add` and the list in the Partner Dashboard will update to show your added contract.
+- 
+After verifying your smart contract, you can interact with Wert as required. If you make any changes, you must add the new contract and ABI.
 
 <img src="nextjs/public/images/wert_2.png" alt="create smart contract" width="650">
 
@@ -589,7 +635,15 @@ The Affiliate can terminate the agreement with a 90 days' notice.
 
 **Who is the Merchant of Record for NFT purchases?** - Wert.io is the Merchant of Record.
 
+**What other blockchians are supported to accept payments - besides Polygon and Arbbitrum covered in this doc?** - Wert currently supports a large number of
+blockchains and different tokens on each of these blockchians in which payments can be received. For a full list consult their website https://docs.wert.io/docs/supported-coins-and-blockchains . 
+Additional integration development would be required if you choose a blockchain other than Polygon or Arbitrum
 
+**From which Countries and US states can I receive payments?** - For a full list of countries and US states that are supported by Wert is available here https://docs.wert.io/docs/service-availability
+
+**Do you have guidance on how to pass Apple Store review?** - Wert has compiled a guide on their website for this https://docs.wert.io/docs/passing-apple-store-review
+
+**Does Wert have an FAQ section?** - Yes, for other questions not covered above, consult this page https://docs.wert.io/docs/general-faq
 
 <!-- GETTING STARTED -->
 ## 3 - Getting Started

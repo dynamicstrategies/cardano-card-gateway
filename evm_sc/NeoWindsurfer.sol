@@ -10,9 +10,11 @@ contract NeoWindsurfer is ERC20, Ownable {
     string public policyIdHex = "8b6e03019fe44a02b9197829317a5459cdec357e236c2678289e1c8d";
     string public assetName = "NeoWindsurfer";
 
+    event Minted(address indexed to, address indexed contractAddress, uint256 valueSent, string indexed identifier);
 
     function mint(address to) public payable {
         _mint(to, 1 * 10 ** 18);
+        emit Minted(to, address(this), msg.value, "MintedWertCardano");
     }
 
     function getBalance() public view returns(uint) {
