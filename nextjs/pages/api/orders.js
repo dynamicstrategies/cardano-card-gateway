@@ -142,48 +142,6 @@ const handle = async (req, res) => {
                 statusCode = 500;
             }
 
-        // } else if (req.body?.purpose === "updatetxhash" ) {
-        //
-        //     const {
-        //         orderId,
-        //         paymentTxHash
-        //     } = req.body;
-        //
-        //     const timestamp = Date.now();
-        //     const update = {paymentTxHash, timestamp}
-        //
-        //     try {
-        //         const doc = await Order.findByIdAndUpdate(orderId, update)
-        //         // console.log(result)
-        //         statusCode = 200;
-        //         result = doc;
-        //     } catch (err) {
-        //         console.log(err)
-        //         result = err;
-        //         statusCode = 500;
-        //     }
-
-        // } else if (req.body?.purpose === "updateemail" ) {
-        //
-        //     const {
-        //         orderId,
-        //         emailAddr
-        //     } = req.body;
-        //
-        //     const timestamp = Date.now();
-        //     const update = {emailAddr, timestamp}
-        //
-        //     try {
-        //         const doc = await Order.findByIdAndUpdate(orderId, update)
-        //         // console.log(result)
-        //         statusCode = 200;
-        //         result = doc;
-        //     } catch (err) {
-        //         console.log(err)
-        //         result = err;
-        //         statusCode = 500;
-        //     }
-
         }
 
 
@@ -191,44 +149,6 @@ const handle = async (req, res) => {
 
     }
 
-    //###############
-    // GET methods #
-    //###############
-    if (req.method === "GET") {
-
-        const Order = connection.model('Order', OrderSchema);
-
-        const params = JSON.parse(req.query[0])
-
-        if (Object.keys(req.query).length && params?.what === "status" && params?.orderId) {
-
-            // TODO: deprecated
-
-        } else if (Object.keys(req.query).length && params?.what === "senttxhash" && params?.orderId) {
-
-            // TODO: deprecated
-
-        } else if (Object.keys(req.query).length && params?.what === "numticketssold") {
-
-            // TODO: deprecated
-
-        } else if (Object.keys(req.query).length && params?.what === "numticketssoldMulti") {
-
-            // TODO: deprecated
-
-        } else if (Object.keys(req.query).length && params?.what === "numticketsremaining") {
-
-            // TODO: deprecated
-
-        } else {
-            statusCode = 500;
-            result = "incorrect request";
-            // res.status(500).json("incorrect request");
-        }
-
-        res.status(statusCode).json(result);
-
-    }
 
 }
 

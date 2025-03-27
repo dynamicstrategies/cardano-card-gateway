@@ -1,15 +1,14 @@
 /**
  * This API endpoint accepts POST requests from the frontend, adds
  * information on the EVM smart contract where the payment should be
- * made and the price of the digital asset in POL tokens and then
+ * made and the price of the digital asset in POL or ETH tokens and then
  * returns back a signature, signed with a Wert Private Key (that
  * is generated during onboarding to Wert.io)
  *
  * The information received from the frontend contains:
  * - Cardano Address of the User's wallet
  * - The Wert private key, which in production should be set as
- * and environment variable and changes made to the code to read
- * from this environment variable
+ * and environment variable
  *
  * The information complemented from the environment variables is:
  * - The Token that you are paid with from Wert.io (e.g. POL)
@@ -20,7 +19,6 @@
  */
 
 import { signSmartContractData } from '@wert-io/widget-sc-signer';
-
 
 const WERT_PRV_KEY = process.env.WERT_PRV_KEY
 const WERT_COMMODITY = process.env.WERT_COMMODITY;

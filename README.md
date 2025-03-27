@@ -508,7 +508,7 @@ Select `NFT Checkout` and then Contact Sales to set-up a Sandbox account to star
 Supporting documentation, besides what is included in this repo, is available at
 <a href="https://docs.wert.io/docs/introduction">wert.io docs</a>
 
-Sandbox access
+Sandbox login: https://partner-sandbox.wert.io/login/ 
 
 
 #### 2.4.1 - Setting-up crypto keys
