@@ -4,8 +4,6 @@ import { withRouter } from 'next/router';
 import {State} from "@/components/State";
 import '@blueprintjs/core/lib/css/blueprint.css'
 import '@blueprintjs/icons/lib/css/blueprint-icons.css'
-import { StarIcon } from '@heroicons/react/20/solid'
-import classNames from "classnames";
 import Image from "next/image";
 import IndexHeader from "@/components/IndexHeader";
 import Head from 'next/head';
@@ -21,9 +19,6 @@ import axios from "axios";
  * in production
  */
 export const getServerSideProps = async (ctx) => {
-
-  // const wertPrvKey = ctx.query?.wertPrvKey || null;
-  // const wertPartnerId = ctx.query?.wertPartnerId || null;
 
   const wertPartnerId = process.env.WERT_PARTNER_ID || null;
 
@@ -50,7 +45,7 @@ export const getServerSideProps = async (ctx) => {
 }
 
 
-const reviews = { href: '#', average: 4, totalCount: 117 }
+// const reviews = { href: '#', average: 4, totalCount: 117 }
 
 
 /**
@@ -159,39 +154,6 @@ const Front = observer(class Front extends React.Component {
   }
 
 
-  // updateTxHashInDB = async (orderId, paymentTxHash) => {
-  //
-  //   let payload = {
-  //     purpose: "updatetxhash",
-  //     orderId,
-  //     paymentTxHash
-  //   }
-  //
-  //   const req = JSON.stringify(payload);
-  //
-  //   try {
-  //     const URL = `${this.props.WERT_WEBHOOK_API}/orders`
-  //     const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
-  //
-  //     if (response.status === 200) {
-  //
-  //       const data = response.data;
-  //       // console.log(data);
-  //       return data
-  //
-  //     } else {
-  //       // console.log(response)
-  //       throw Error("Error updating paymentTxHash")
-  //     }
-  //
-  //   } catch (err) {
-  //     throw err;
-  //   }
-  //
-  // }
-
-
-
 
   getTicketStatusById = async (orderId) => {
 
@@ -208,14 +170,6 @@ const Front = observer(class Front extends React.Component {
 
       const URL = `${this.props.WERT_WEBHOOK_API}/orders`
       const response = await axios.post(URL, req, {headers: {'Content-Type': 'application/json'}})
-
-      // const response = await axios({
-      //   method: 'get',
-      //   url: '/orders',
-      //   baseURL: this.props.WERT_WEBHOOK_API,
-      //   params: req,
-      //   headers: {'Content-Type': 'application/json'},
-      // })
 
       if (response.status === 200) {
 
@@ -492,34 +446,13 @@ const Front = observer(class Front extends React.Component {
                 {/* Options */}
                 <div className="mt-4 lg:row-span-3 lg:mt-0">
                   <h2 className="sr-only">Product information</h2>
-                  <p className="text-3xl tracking-tight text-gray-900">{
+                  <p className="text-3xl font-bold tracking-tight text-gray-900">{
                     this.state.assetPriceUSD
                     ? `$${Number(this.state.assetPriceUSD).toLocaleString("en-US", {maximumFractionDigits:1})} USD`
                     : "Price loading ..."
                   }</p>
 
-                  {/* Reviews */}
-                  <div className="mt-6">
-                    <h3 className="sr-only">Reviews</h3>
-                    <div className="flex items-center">
-                      <div className="flex items-center">
-                        {[0, 1, 2, 3, 4].map((rating) => (
-                            <StarIcon
-                                key={rating}
-                                aria-hidden="true"
-                                className={classNames(
-                                    reviews.average > rating ? 'text-gray-900' : 'text-gray-200',
-                                    'size-5 shrink-0',
-                                )}
-                            />
-                        ))}
-                      </div>
-                      <p className="sr-only">{reviews.average} out of 5 stars</p>
-                      <a href={reviews.href} className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                        {reviews.totalCount} reviews
-                      </a>
-                    </div>
-                  </div>
+
 
                   <div className="mt-10">
                     {/* Colors */}
@@ -536,21 +469,16 @@ const Front = observer(class Front extends React.Component {
                               style={
                                 this.state.changeAddress
                                     ? {fontSize: "12px"}
-                                    : {fontSize: "12px", backgroundColor: "rgb(245,160,64)", textAlign: "center", color: "#131B4D"}
+                                    : {fontSize: "12px", backgroundColor: "rgb(234,234,234)", textAlign: "center", color: "#131B4D"}
                               }
                               disabled={false}
-                              placeholder="should start with addr..."
+                              placeholder="addr..."
                               leftIcon="id-number"
                               onChange={(str) => {
 
                                 this.setState({changeAddress: str.target.value})
                               }}
                               value={this.state.changeAddress}
-                              // rightElement={
-                              //     <div className={"ud-p-1"}>
-                              //
-                              //     </div>
-                              // }
 
                           />
                         </FormGroup>
@@ -560,77 +488,23 @@ const Front = observer(class Front extends React.Component {
                     </div>
 
 
-
-                    {/*<button*/}
-                    {/*    type="submit"*/}
-                    {/*    className="mt-10 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"*/}
-                    {/*>*/}
-                    {/*  Pay with Card*/}
-                    {/*</button>*/}
-
                     {this.state.wertPartnerId &&
                       <PayWithWert
                           adaAmount={75}
                           WERT_WEBHOOK_API={this.props.WERT_WEBHOOK_API}
                           handleWertInitiated={this.handleWertInitiated}
                           WERT_PARTNER_ID={this.state.wertPartnerId}
-                          // WERT_SECRET_KEY={this.state.wertPrvKey}
                           orderId={this.state.orderId}
                           ticketAssetName={this.props.ASSET_NAME}
                           ticketImgSrc={this.props.ASSET_IMG_SRC || ""}
-                          // eventId={this.props.eventId}
-                          // walletAddress={this.props.walletAddress}
-                          // updateTxHashInDB={this.updateTxHashInDB}
                       />
                     }
-
-                    {/*<div id="wert_credentials" className="text-base font-strong text-gray-700">*/}
-                    {/*  <FormGroup*/}
-                    {/*      helperText={<div className="text-gray-700">Your Partner ID on the Wert.io platform</div>}*/}
-                    {/*      style={{fontSize: "12px"}}*/}
-                    {/*      label="Wert Partner Id"*/}
-                    {/*  >*/}
-                    {/*    <InputGroup*/}
-                    {/*        style={{fontSize: "12px"}}*/}
-                    {/*        disabled={false}*/}
-                    {/*        placeholder="should start with 0x..."*/}
-                    {/*        leftIcon="id-number"*/}
-                    {/*        onChange={(str) => {*/}
-
-                    {/*          this.setState({wertPartnerId: str.target.value})*/}
-                    {/*        }}*/}
-                    {/*        value={this.state.wertPartnerId}*/}
-
-                    {/*    />*/}
-                    {/*  </FormGroup>*/}
-
-                    {/*  <FormGroup*/}
-                    {/*      helperText={<div className="text-gray-700">The private key that you should have received when*/}
-                    {/*        signing up with Wert.io</div>}*/}
-                    {/*      style={{fontSize: "12px"}}*/}
-                    {/*      label="Wert Private Key"*/}
-                    {/*  >*/}
-                    {/*    <InputGroup*/}
-                    {/*        style={{fontSize: "12px"}}*/}
-                    {/*        disabled={false}*/}
-                    {/*        placeholder="should start with 0x..."*/}
-                    {/*        leftIcon="id-number"*/}
-                    {/*        onChange={(str) => {*/}
-
-                    {/*          this.setState({wertPrvKey: str.target.value})*/}
-                    {/*        }}*/}
-                    {/*        value={this.state.wertPrvKey}*/}
-
-                    {/*    />*/}
-                    {/*  </FormGroup>*/}
-                    {/*</div>*/}
 
 
                     <div className="mt-10">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium text-gray-900">Status</h3>
-                        <p className="text-sm font-medium text-gray-400">
-                          ... purchase progress reported here
+                        <p className="text-sm text-gray-600">
+                          ... purchase progress will be reported here ...
                         </p>
                       </div>
 
