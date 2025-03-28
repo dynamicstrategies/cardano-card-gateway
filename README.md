@@ -757,6 +757,8 @@ services:
       - WERT_COMMODITY=POL
       - WERT_NETWORK=amoy
       - WERT_PAYTO_WALLET=<<insert_your_wallet_address_on_evm>>
+      - WERT_PARTNER_ID=<<0_to_update>>
+      - WERT_PRV_KEY=<<0_to_update>>
     depends_on:
       - TESTNET_cgateway_mongodb
 
