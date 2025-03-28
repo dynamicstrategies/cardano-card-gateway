@@ -40,6 +40,13 @@ send Assets on the Cardano blockchain
 Demo of a sample shopfront with a "Pay with Card" button is available here:
 <a href="https://cardgateway.work.gd">cardgateway.work.gd</a>
 
+### Process Flow Diagram
+
+The following diagram shows the interactions between the different components. 
+This is a high level diagram intended to serve as a visual guide of what the components do.
+Each of these is then dicussed in more detail further below.
+
+<img src="nextjs/public/images/process_diagram_1.png" alt="Page Example" width="800">
 
 #### Shopfront
 
